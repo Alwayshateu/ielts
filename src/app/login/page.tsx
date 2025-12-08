@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation'; // Next.js 路由
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'; // 引入我们封装的
 import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
