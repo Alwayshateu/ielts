@@ -1,7 +1,6 @@
 'use client'; // 这是一个客户端组件，因为它包含表单交互
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation'; // Next.js 路由
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'; // 引入我们封装的
 import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 
@@ -10,7 +9,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
   
-  const router = useRouter();
   const supabase = createSupabaseBrowserClient();
 
   // 处理登录 (Magic Link 方式，最简单且无需密码逻辑)

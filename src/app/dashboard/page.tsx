@@ -1,7 +1,6 @@
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import DashboardContent from '../components/DashboardContent';
-import { AlertCircle } from 'lucide-react';
 
 // 强制动态渲染，防止 Next.js 缓存页面导致用户信息不更新
 export const dynamic = 'force-dynamic';
@@ -11,7 +10,7 @@ export default async function DashboardPage() {
   const cookieStore = await cookies();
   
   // 2. 创建 Supabase 客户端
-  const supabase = createServerComponentClient({ cookies: () => cookieStore });
+  const supabase = createServerComponentClient({ cookies: async () => cookieStore });
 
   // 3. 获取用户信息 (使用 getUser 验证安全性)
   const { data: { user }, error: authError } = await supabase.auth.getUser();
