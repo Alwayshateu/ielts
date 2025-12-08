@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation';
 
 export default async function Home() {
   const cookieStore =cookies();               // 加 await！
-  const supabase = createServerComponentClient({ cookies: () => cookieStore });
+  const supabase = createServerComponentClient({cookies});
 
   const { data: { session } } = await supabase.auth.getSession();
 
