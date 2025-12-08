@@ -1,4 +1,26 @@
 // src/lib/supabase-server.ts
-// ⚠️ 放弃封装。这个文件现在只负责导入和导出必要的工具。
-export { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
-// 我们不需要在这里导入 cookies，让调用者 (page.tsx) 自己去导入。
+// 服务端 Supabase 客户端创建函数
+
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
+
+export async function createSupabaseServerClient() {
+  const cookieStore = await cookies();
+  
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            cookieStore.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+}
