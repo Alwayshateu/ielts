@@ -6,7 +6,6 @@ import { createSupabaseBrowserClient } from '@/lib/supabase-browser'; // 引入�
 import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
-export const revalidate = 0;
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
