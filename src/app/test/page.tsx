@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { 
   CheckCircle2, 
@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 
 // --- 修复的防抖函数 ---
-const simpleDebounce = <T extends (...args: any[]) => void>(
+const simpleDebounce = <T extends (...args: unknown[]) => void>(
   func: T, 
   delay: number
 ) => {
@@ -71,7 +71,7 @@ export default function IeltsTrainer() {
   }, []);
 
   // --- 修复的获取题目函数 ---
-  const fetchQuestionImmediate = async () => {
+  const fetchQuestionImmediate = useCallback(async () => {
     setLoading(true);
     setStatus('idle');
     setUserAnswer('');
@@ -96,12 +96,12 @@ export default function IeltsTrainer() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // --- 修复的防抖调用 ---
-  const debouncedFetchQuestion = useCallback(
-    simpleDebounce(fetchQuestionImmediate, 300),
-    []
+  const debouncedFetchQuestion = useMemo(
+    () => simpleDebounce(fetchQuestionImmediate, 300),
+    [fetchQuestionImmediate]
   );
 
   // --- 修复的提交逻辑 ---
@@ -283,7 +283,7 @@ export default function IeltsTrainer() {
                       
                       {status === 'wrong' && (
                         <div className="mb-4 inline-block bg-white border border-red-200 text-red-700 px-4 py-2 rounded-lg text-sm shadow-sm">
-                          正确答案是：
+                          正确答案��：
                           <span className="font-bold ml-1 text-lg">{question.correct_answer}</span>
                         </div>
                       )}
