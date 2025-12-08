@@ -1,4 +1,4 @@
-'use client'; // 这是一个客户端组件，因为它包含表单交互
+export const dynamic = "force-dynamic";
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation'; // Next.js 路由
