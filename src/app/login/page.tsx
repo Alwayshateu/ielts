@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'; // Next.js 路由
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser'; // 引入我们封装的
 import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 
-export const dynamic = 'force-dynamic';
+
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -13,7 +13,7 @@ export default function LoginPage() {
   const [message, setMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
   
   const router = useRouter();
-  const supabase = createSupabaseBrowserClient();
+  
 
   // 处理登录 (Magic Link 方式，最简单且无需密码逻辑)
   // 或者如果你想用密码登录，我可以改。这里先写最通用的邮箱登录。
@@ -21,7 +21,7 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setMessage(null);
-
+    const supabase = createSupabaseBrowserClient();
     // 发送登录链接 (Magic Link)
     const { error } = await supabase.auth.signInWithOtp({
       email,
