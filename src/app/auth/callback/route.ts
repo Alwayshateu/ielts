@@ -1,23 +1,24 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
-import { cookies } from 'next/headers';
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 
 export async function GET(request: Request) {
-  const requestUrl = new URL(request.url);
-  const code = requestUrl.searchParams.get('code');
+  // Magic Link 回调 URL: /auth/callback?code=xxxx
+  const { searchParams } = new URL(request.url);
+  const code = searchParams.get("code");
 
-  if (code) {
-    // 1. 关键修复：必须 await cookies()
-    const cookieStore = await cookies();
-    
-    // 2. 创建 Supabase 客户端，传入 cookieStore
-    const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
-    
-    // 3. 用 Code 换取 Session (登录的核心步骤)
-    await supabase.auth.exchangeCodeForSession(code);
+  if (!code) {
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // 4. 登录成功后，跳转到 Dashboard
-  // 使用 requestUrl.origin 可以自动适配 localhost 和 vercel 域名
-  return NextResponse.redirect(`${requestUrl.origin}/dashboard`);
+  // 注意：这里的 cookies() 是同步获取，不要 await！
+  const cookieStore = cookies();
+
+  const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
+
+  // 用 code 换 session（核心步骤）
+  await supabase.auth.exchangeCodeForSession(code);
+
+  // 登录成功后重定向
+  return NextResponse.redirect(new URL("/dashboard", request.url));
 }
