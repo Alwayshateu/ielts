@@ -1,4 +1,4 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs';
+import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import DashboardContent from '../components/DashboardContent';
 
@@ -6,8 +6,24 @@ import DashboardContent from '../components/DashboardContent';
 export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
-  // 1. 正确：cookies 作为函数传入，而不是 cookies()
-  const supabase = createServerComponentClient({ cookies });
+  const cookieStore = await cookies();
+  
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            cookieStore.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
 
   // 2. 获取用户
   const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -40,3 +56,4 @@ export default async function DashboardPage() {
     </div>
   );
 }
+
