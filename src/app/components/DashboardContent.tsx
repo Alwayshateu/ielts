@@ -1,14 +1,20 @@
 'use client';
 
+
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 // 引入 Shuffle 图标用于综合训练
-import { LogOut, BookOpen, Headphones, PenTool, Mic, Loader2, Shuffle } from 'lucide-react';
+import { LogOut, BookOpen, Headphones, PenTool, Mic, Loader2, Shuffle ,BookX } from 'lucide-react';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
 
-// --- 更新：加入综合训练 ---
+
+
+import Link from 'next/link'; 
+import { Heart } from 'lucide-react'; // 引入 Heart 图标用于收藏夹
+
+// --- 更新：包含综合训练的 categories ---
 const categories = [
-  // 新增：综合训练 (放在最前面或最后面，用 distinct 颜色)
+  // 新增：综合训练
   { 
     id: 'mixed', // 对应后端 SQL 的 'mixed' 逻辑
     name: '综合随机训练', 
@@ -22,12 +28,6 @@ const categories = [
   { id: 'speaking', name: '口语训练', icon: <Mic />, color: 'bg-orange-50 text-orange-600', desc: '口语话题模拟' },
 ];
 
-const difficulties = [
-  { id: 'easy', label: '简单' },
-  { id: 'medium', label: '中等' },
-  { id: 'hard', label: '困难' },
-];
-
 interface Profile {
   username: string | null;
   email: string | null;
@@ -38,7 +38,7 @@ export default function DashboardContent({ profile }: { profile: Profile }) {
   const supabase = createSupabaseBrowserClient();
   
   const [loading, setLoading] = useState(false);
-  const [selectedDifficulty, setSelectedDifficulty] = useState('medium');
+  const DEFAULT_DIFFICULTY = 'medium'; // 硬编码默认难度
 
   const handleLogout = async () => {
     try {
@@ -52,8 +52,8 @@ export default function DashboardContent({ profile }: { profile: Profile }) {
   };
 
   const handleStartPractice = (categoryId: string) => {
-    // 无论是 mixed 还是 reading，逻辑都一样，直接传参
-    const url = `/practice?category=${categoryId}&difficulty=${selectedDifficulty}`;
+    // 使用硬编码的默认难度
+    const url = `/practice?category=${categoryId}&difficulty=${DEFAULT_DIFFICULTY}`;
     router.push(url);
   };
 
@@ -61,8 +61,11 @@ export default function DashboardContent({ profile }: { profile: Profile }) {
 
   return (
     <div className="max-w-5xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
-      {/* Header 和 难度选择 (保持不变) ... */}
+      
+      {/* 🚀 Header 区域：整合了欢迎语、收藏夹入口和退出按钮 */}
       <header className="flex justify-between items-center mb-12">
+        
+        {/* 左侧：欢迎语 */}
         <div>
           <h1 className="text-3xl font-bold text-slate-900">
             你好，<span className="text-indigo-600">{displayName}</span>
@@ -70,42 +73,45 @@ export default function DashboardContent({ profile }: { profile: Profile }) {
           <p className="text-slate-500 text-sm mt-1">今天想练点什么？</p>
         </div>
         
-        <button 
-          onClick={handleLogout}
-          disabled={loading}
-          className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-full text-slate-600 text-sm hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all shadow-sm"
-        >
-          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
-          退出登录
-        </button>
+        {/* ➡️ 右侧：操作按钮区域 (核心修改点) */}
+        <div className="flex items-center gap-3">
+          
+          {/* 📚 新增：错题本入口 */}
+          <Link 
+            href="/wrong-book"
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-full text-slate-600 text-sm hover:bg-orange-50 hover:text-orange-600 hover:border-orange-100 transition-all shadow-sm"
+           > 
+            <BookX className="w-4 h-4" />
+            错题本
+          </Link>
+          {/* 🌟 收藏夹入口 */}
+          <Link 
+            href="/favorites"
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-full text-slate-600 text-sm hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-100 transition-all shadow-sm"
+          >
+            <Heart className="w-4 h-4" />
+            我的收藏
+          </Link>
+          
+          {/* 退出登录按钮 */}
+          <button 
+            onClick={handleLogout}
+            disabled={loading}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-full text-slate-600 text-sm hover:bg-red-50 hover:text-red-600 hover:border-red-100 transition-all shadow-sm"
+          >
+            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <LogOut className="w-4 h-4" />}
+            退出登录
+          </button>
+          
+        </div>
+        
       </header>
 
-      {/* 难度选择器 */}
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-8">
-        <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">当前难度设置</h2>
-        <div className="flex gap-3">
-          {difficulties.map((diff) => (
-            <button
-              key={diff.id}
-              onClick={() => setSelectedDifficulty(diff.id)}
-              className={`
-                px-6 py-2.5 rounded-xl text-sm font-bold transition-all duration-200
-                ${selectedDifficulty === diff.id 
-                  ? 'bg-slate-900 text-white shadow-lg shadow-slate-200 transform scale-105' 
-                  : 'bg-slate-50 text-slate-500 hover:bg-slate-100'
-                }
-              `}
-            >
-              {diff.label}
-            </button>
-          ))}
-        </div>
-      </div>
+      {/* 难度选择器区块已被删除 */}
 
       {/* 分类入口 Grid */}
       <h2 className="text-lg font-bold text-slate-900 mb-5">开始练习</h2>
       
-      {/* 第一行：综合训练 (独占一行，或者做成大卡片) */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         
         {/* 映射所有卡片 */}
