@@ -2,11 +2,11 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   let response = NextResponse.next();
 
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-    console.warn('Supabase environment variables not found in middleware');
+    console.warn('Supabase environment variables not found in proxy');
     return response;
   }
 
@@ -34,18 +34,23 @@ export async function middleware(req: NextRequest) {
       }
     );
 
-    const { data: { session } } = await supabase.auth.getSession();
-    const path = req.nextUrl.pathname.replace(/\/$/, '');
+    const { data: { user } } = await supabase.auth.getUser();
+    const isAuthenticated = Boolean(user);
+    const path =
+      req.nextUrl.pathname === '/'
+        ? '/'
+        : req.nextUrl.pathname.replace(/\/$/, '');
+    const isProtectedPath =
+      path.startsWith('/dashboard') ||
+      path.startsWith('/practice') ||
+      path.startsWith('/favorites') ||
+      path.startsWith('/wrong-book');
 
-    if (session && (path === '/login' || path === '/signup')) {
+    if (isAuthenticated && path === '/login') {
       return NextResponse.redirect(new URL('/dashboard', req.url));
     }
 
-    if (!session && path.startsWith('/dashboard')) {
-      return NextResponse.redirect(new URL('/login', req.url));
-    }
-
-    if (!session && path === '/') {
+    if (!isAuthenticated && isProtectedPath) {
       return NextResponse.redirect(new URL('/login', req.url));
     }
 
@@ -60,9 +65,10 @@ export const config = {
   matcher: [
     '/',
     '/dashboard/:path*',
+    '/favorites/:path*',
     '/login',
-    '/signup',
+    '/login/:path*',
     '/practice/:path*',
-    '/((?!api|_next/static|_next/image|favicon.ico|assets).*)'
+    '/wrong-book/:path*',
   ],
 };

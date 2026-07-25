@@ -1,26 +1,135 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/*
+  IELTS Trainer — design foundation
+  Apple-style restraint: system type, single indigo accent, off-black neutrals.
+  Motion (springs / layout) is driven in JS by the `motion` library; CSS here
+  covers type, base surfaces, focus, and a few ambient/interaction primitives.
+*/
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+
+  --color-ink: #18181b;
+  --color-ink-muted: #52525b;
+  --color-ink-subtle: #71717a;
+  --color-surface: #ffffff;
+  --color-canvas: #f6f6f7;
+  --color-line: #e6e6e9;
+  --color-accent: #4f46e5;
+  --color-accent-strong: #4338ca;
+  --color-accent-tint: #eef2ff;
+
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+:root {
+  --canvas: #f6f6f7;
+  --ink: #18181b;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --canvas: #0d0d0f;
+    --ink: #f4f4f5;
   }
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+::selection {
+  background: color-mix(in srgb, #4f46e5 22%, transparent);
+  color: inherit;
+}
+
+/* A single, calm focus ring across the app. */
+:focus-visible {
+  outline: 2px solid #4f46e5;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Tabular figures for stats / counters. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Display type: tighten tracking as it grows (apple-design §15). */
+.text-display {
+  letter-spacing: -0.022em;
+  line-height: 1.04;
+}
+.text-tight {
+  letter-spacing: -0.014em;
+}
+
+/*
+  Ambient primitives — used sparingly on non-quiz surfaces (login / dashboard).
+  All are gated on prefers-reduced-motion below.
+*/
+
+/* Fine grain over solid panels; fixed + pointer-events-none for cheap paint. */
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.4;
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Soft aurora blob — slow, low-contrast, and disabled under reduced-motion. */
+.aurora {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(60px);
+  opacity: 0.5;
+  will-change: transform;
+  animation: drift 22s var(--ease-out-quint) infinite alternate;
+}
+@keyframes drift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(3%, -4%, 0) scale(1.08); }
+}
+
+/* Sheen sweep for premium buttons on hover. */
+@keyframes sheen {
+  from { transform: translateX(-140%) skewX(-12deg); }
+  to { transform: translateX(240%) skewX(-12deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .aurora { animation: none; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .glass { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
 }

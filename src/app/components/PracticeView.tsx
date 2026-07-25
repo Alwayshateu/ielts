@@ -1,332 +1,684 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useCallback, useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
+import {
+  ArrowLeft,
+  ArrowRight,
+  BookOpenText,
+  CheckCircle,
+  CircleNotch,
+  ClipboardText,
+  Heart,
+  Target,
+  WarningCircle,
+  XCircle,
+} from '@phosphor-icons/react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
-import { 
-  Loader2, CheckCircle2, XCircle, ArrowRight, 
-  BookOpen, Heart, AlertCircle, ArrowLeft 
-} from 'lucide-react';
+import { formatCategory, formatDifficulty } from '@/lib/question-labels';
+import { PRACTICE_SESSIONS_HREF } from '@/lib/practice-session-links';
+import type { IeltsQuestion } from '@/lib/types';
+import { riseChild, springSnap, springSoft, staggerParent } from './ui/motion-presets';
 
-// 类型定义
-type QuestionType = 'multiple_choice' | 'fill_in_the_blank';
-
-interface IeltsQuestion {
-  id: string;
-  type: QuestionType;
-  category: string;
-  difficulty: string;
-  article_content?: string;
-  question_text: string;
-  options?: string[];
-  correct_answer: string;
-  explanation?: string;
-}
+type AnswerStatus = 'idle' | 'correct' | 'wrong';
+type LoadState = 'loading' | 'ready' | 'empty' | 'error';
 
 export default function PracticeView({ userId }: { userId: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const supabase = createSupabaseBrowserClient();
+  const reduceMotion = useReducedMotion();
 
-  // 1. 获取 URL 参数
   const category = searchParams.get('category') || 'mixed';
   const difficulty = searchParams.get('difficulty') || 'medium';
 
-  // 2. 状态管理
   const [question, setQuestion] = useState<IeltsQuestion | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loadState, setLoadState] = useState<LoadState>('loading');
   const [userAnswer, setUserAnswer] = useState('');
-  const [status, setStatus] = useState<'idle' | 'correct' | 'wrong'>('idle');
+  const [status, setStatus] = useState<AnswerStatus>('idle');
   const [isFavorited, setIsFavorited] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [sessionStats, setSessionStats] = useState({ attempts: 0, correct: 0, wrong: 0, streak: 0 });
 
-  // --- 核心逻辑：获取题目 ---
+  const checkIfFavorited = useCallback(async (questionId: string) => {
+    const { data } = await supabase
+      .from('favorites')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('question_id', questionId)
+      .maybeSingle();
+
+    setIsFavorited(Boolean(data));
+  }, [supabase, userId]);
+
   const fetchQuestion = useCallback(async () => {
-    setLoading(true);
+    setLoadState('loading');
     setStatus('idle');
     setUserAnswer('');
     setIsFavorited(false);
+    setMessage(null);
 
     try {
-      // 调用新的 RPC 函数
       const { data, error } = await supabase.rpc('get_random_questions', {
         p_category: category,
-        p_difficulty: category === 'mixed' ? null : difficulty, // 综合模式下可能忽略难度，或者你也可以加上
-        p_limit: 1
+        p_difficulty: category === 'mixed' ? null : difficulty,
+        p_limit: 1,
       });
 
       if (error) throw error;
 
       if (data && data.length > 0) {
         setQuestion(data[0]);
-        // 检查该题是否已收藏 (锦上添花的功能)
-        checkIfFavorited(data[0].id);
+        await checkIfFavorited(data[0].id);
+        setLoadState('ready');
       } else {
         setQuestion(null);
+        setLoadState('empty');
       }
-    } catch (err) {
-      console.error('Fetch error:', err);
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      console.error('Fetch question failed:', error);
+      setQuestion(null);
+      setLoadState('error');
+      setMessage('题目加载失败，请检查网络后重试。');
     }
-  }, [category, difficulty, supabase]);
+  }, [category, checkIfFavorited, difficulty, supabase]);
 
-  // 检查收藏状态
-  const checkIfFavorited = async (questionId: string) => {
-    const { data } = await supabase
-      .from('favorites')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('question_id', questionId)
-      .single();
-    if (data) setIsFavorited(true);
-  };
-
-  // 初始化加载
   useEffect(() => {
-    fetchQuestion();
+    void fetchQuestion();
   }, [fetchQuestion]);
 
-  // --- 交互逻辑：提交答案 ---
-  const handleSubmit = async () => {
-    if (!question || !userAnswer.trim()) return;
+  const handleSubmit = useCallback(async () => {
+    if (!question || !userAnswer.trim() || saving || status !== 'idle') return;
 
     setSaving(true);
+    setMessage(null);
+
     const cleanUser = userAnswer.trim().toLowerCase();
     const cleanCorrect = question.correct_answer.trim().toLowerCase();
-    
-    // 简单判分逻辑
     const isCorrect = cleanUser === cleanCorrect;
+
     setStatus(isCorrect ? 'correct' : 'wrong');
 
-    // 1. 记录历史 (History)
-    await supabase.from('history').insert({
-      user_id: userId,
-      question_id: question.id,
-      user_answer: userAnswer,
-      is_correct: isCorrect
-    });
+    try {
+      const { error: historyError } = await supabase.from('history').insert({
+        user_id: userId,
+        question_id: question.id,
+        user_answer: userAnswer,
+        is_correct: isCorrect,
+      });
 
-    // 2. 如果错了，加入错题本 (Wrong Book)
-    // 先检查是否已经在错题本，避免重复插入
-    if (!isCorrect) {
-       const { data: exist } = await supabase.from('wrong_book')
-         .select('id').eq('user_id', userId).eq('question_id', question.id).single();
-       
-       if (!exist) {
-         await supabase.from('wrong_book').insert({
-           user_id: userId,
-           question_id: question.id
-         });
-       }
+      if (historyError) throw historyError;
+
+      if (!isCorrect) {
+        const { data: exist, error: existError } = await supabase
+          .from('wrong_book')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('question_id', question.id)
+          .maybeSingle();
+
+        if (existError) throw existError;
+
+        if (!exist) {
+          const { error: wrongBookError } = await supabase.from('wrong_book').insert({
+            user_id: userId,
+            question_id: question.id,
+          });
+
+          if (wrongBookError) throw wrongBookError;
+        }
+      }
+
+      setSessionStats((current) => ({
+        attempts: current.attempts + 1,
+        correct: current.correct + (isCorrect ? 1 : 0),
+        wrong: current.wrong + (isCorrect ? 0 : 1),
+        streak: isCorrect ? current.streak + 1 : 0,
+      }));
+    } catch (error) {
+      console.error('Submit failed:', error);
+      setStatus('idle');
+      setMessage('提交失败，请检查网络后重试。');
+    } finally {
+      setSaving(false);
     }
-    setSaving(false);
-  };
+  }, [question, saving, status, supabase, userAnswer, userId]);
 
-  // --- 交互逻辑：收藏/取消收藏 ---
-  const toggleFavorite = async () => {
+  const toggleFavorite = useCallback(async () => {
     if (!question) return;
 
-    // UI 乐观更新
     const nextState = !isFavorited;
     setIsFavorited(nextState);
+    setMessage(null);
 
-    if (nextState) {
-      // 添加收藏
-      await supabase.from('favorites').insert({ user_id: userId, question_id: question.id });
-    } else {
-      // 取消收藏
-      await supabase.from('favorites').delete().eq('user_id', userId).eq('question_id', question.id);
+    const { error } = nextState
+      ? await supabase.from('favorites').insert({ user_id: userId, question_id: question.id })
+      : await supabase
+          .from('favorites')
+          .delete()
+          .eq('user_id', userId)
+          .eq('question_id', question.id);
+
+    if (error) {
+      console.error('Favorite toggle failed:', error);
+      setIsFavorited(!nextState);
+      setMessage('收藏状态更新失败，请稍后重试。');
     }
-  };
+  }, [isFavorited, question, supabase, userId]);
 
-  // 键盘快捷键
   useEffect(() => {
-    const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Enter' && status === 'idle' && userAnswer.trim()) handleSubmit();
-      if (e.key === ' ' && status !== 'idle') {
-        e.preventDefault(); // 防止空格滚动页面
-        fetchQuestion();
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === 'Enter' && status === 'idle' && userAnswer.trim()) {
+        void handleSubmit();
+      }
+
+      if (event.key === ' ' && status !== 'idle') {
+        event.preventDefault();
+        void fetchQuestion();
       }
     };
+
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
-  }, [status, userAnswer, fetchQuestion]);
+  }, [fetchQuestion, handleSubmit, status, userAnswer]);
 
+  if (loadState === 'loading') {
+    return <PracticeSkeleton />;
+  }
 
-  // --- 渲染部分 ---
-
-  if (loading) {
+  if (loadState === 'error') {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-slate-500">
-        <Loader2 className="w-10 h-10 animate-spin text-indigo-600 mb-4" />
-        <p>正在从题库抽取题目...</p>
-      </div>
+      <PracticeNotice
+        icon={WarningCircle}
+        title="题目加载失败"
+        description={message ?? '暂时无法连接题库，请稍后再试。'}
+        actionLabel="重新加载"
+        onAction={() => void fetchQuestion()}
+        secondaryLabel="返回 Dashboard"
+        onSecondary={() => router.push('/dashboard')}
+      />
     );
   }
 
-  if (!question) {
+  if (loadState === 'empty' || !question) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-slate-500">
-        <AlertCircle className="w-12 h-12 text-slate-300 mb-4" />
-        <p className="text-lg">该分类下暂时没有题目。</p>
-        <button onClick={() => router.back()} className="mt-4 text-indigo-600 hover:underline">
-          返回选择其他分类
-        </button>
-      </div>
+      <PracticeNotice
+        icon={BookOpenText}
+        title="该分类下暂时没有题目"
+        description="换一个题型或难度继续练习。综合练习会从全题库随机抽取。"
+        actionLabel="返回选择"
+        onAction={() => router.back()}
+      />
     );
   }
+
+  const hasArticle = Boolean(question.article_content);
+  const answered = status !== 'idle';
+  const sessionMode = category === 'mixed' ? '综合训练' : `${formatCategory(question.category)}专项`;
+  const answerMode = question.type === 'multiple_choice' ? '选择题' : '填空题';
+  const sessionAccuracy = sessionStats.attempts > 0
+    ? Math.round((sessionStats.correct / sessionStats.attempts) * 100)
+    : null;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
-      {/* 顶部导航 */}
-      <div className="flex justify-between items-center mb-6">
-        <button 
-          onClick={() => router.back()}
-          className="flex items-center text-slate-500 hover:text-slate-800 transition-colors"
-        >
-          <ArrowLeft size={20} className="mr-1" /> 退出练习
-        </button>
-        <div className="flex items-center gap-2">
-           <span className="bg-indigo-50 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
-             {question.category}
-           </span>
-           <span className="bg-slate-100 text-slate-600 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
-             {question.difficulty}
-           </span>
+    <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mb-6 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="mb-5 flex w-fit items-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium text-ink-muted transition-colors hover:border-zinc-300 hover:text-ink active:scale-[0.98]"
+          >
+            <ArrowLeft size={17} weight="bold" />
+            退出练习
+          </button>
+          <span className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1 text-xs font-semibold text-ink-subtle">
+            <Target size={14} weight="regular" />
+            Practice Workstation
+          </span>
+          <h1 className="text-display mt-4 max-w-2xl text-3xl font-semibold text-ink sm:text-4xl">
+            先读任务，再提交答案。
+          </h1>
+          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-subtle">
+            当前先用现有题库模拟训练工作台：材料、题干、作答和复盘分区呈现，后续可以自然升级为 Passage / Section / Task 的考试式界面。
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+          <span className="rounded-full bg-accent-tint px-3 py-1 text-xs font-semibold text-accent">
+            {sessionMode}
+          </span>
+          <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-semibold text-ink-muted">
+            {formatDifficulty(question.difficulty)}
+          </span>
+          <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-semibold text-ink-muted">
+            {answerMode}
+          </span>
+          <span className="rounded-full border border-line bg-surface px-3 py-1 text-xs font-medium text-ink-subtle">
+            Enter 提交
+          </span>
+          <span className="rounded-full border border-line bg-surface px-3 py-1 text-xs font-medium text-ink-subtle">
+            Space 下一题
+          </span>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* 左侧：文章区域 (仅阅读题显示) */}
-        {question.article_content && (
-          <div className="lg:col-span-6 bg-white rounded-2xl p-6 shadow-sm border border-slate-200 max-h-[70vh] overflow-y-auto">
-            <div className="flex items-center gap-2 mb-4 text-indigo-600 border-b border-slate-100 pb-2">
-              <BookOpen size={18} />
-              <span className="font-bold text-sm">阅读原文</span>
+      <div className="mb-5 grid gap-3 lg:grid-cols-2">
+        <div className="rounded-[1.5rem] border border-line bg-surface/80 p-4 shadow-[0_14px_40px_-36px_rgba(24,24,27,0.35)]">
+          <p className="text-xs font-semibold text-accent">快速单题练习</p>
+          <h2 className="mt-2 text-lg font-semibold text-ink">保持当前题库节奏</h2>
+          <p className="mt-1 text-xs leading-relaxed text-ink-subtle">
+            适合 5 分钟热身。提交会继续写入 legacy history / wrong book / favorites。
+          </p>
+        </div>
+        <Link
+          href={PRACTICE_SESSIONS_HREF}
+          className="group rounded-[1.5rem] border border-emerald-200 bg-emerald-50 p-4 shadow-[0_14px_40px_-36px_rgba(5,150,105,0.35)] transition-all hover:-translate-y-0.5 hover:border-emerald-300 active:scale-[0.99]"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold text-emerald-700">完整 Session 训练</p>
+              <h2 className="mt-2 text-lg font-semibold text-emerald-950">进入材料 + 题组 + 复盘</h2>
+              <p className="mt-1 text-xs leading-relaxed text-emerald-800/75">
+                新 IELTS 主线。当前使用本地草稿、标注、错因标签和 rubric 自评。
+              </p>
             </div>
-            <article 
-              className="prose prose-slate prose-sm max-w-none text-slate-600 font-serif leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: question.article_content }} 
-            />
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-emerald-700 transition-transform group-hover:translate-x-1">
+              <ArrowRight size={17} weight="bold" />
+            </span>
           </div>
-        )}
+        </Link>
+      </div>
 
-        {/* 右侧：题目交互区 */}
-        <div className={`${question.article_content ? 'lg:col-span-6' : 'lg:col-span-8 lg:col-start-3'}`}>
-          <div className="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
-            
-            {/* 题干栏 */}
-            <div className="p-6 sm:p-8 border-b border-slate-50 relative">
-              <div className="flex justify-between items-start gap-4">
-                <h2 className="text-xl font-semibold text-slate-900 leading-snug">
+      <div className="mb-5 rounded-[1.5rem] border border-line bg-surface/80 px-4 py-3 shadow-[0_14px_40px_-36px_rgba(24,24,27,0.35)]">
+        <div className="flex items-start gap-3">
+          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-accent-tint text-accent">
+            <BookOpenText size={16} weight="regular" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-semibold text-ink">后续 IELTS 真实练习形态</p>
+            <p className="mt-1 text-xs leading-relaxed text-ink-subtle">
+              真正的 IELTS 应该是一整篇 Passage / 一个 Listening Section / 一组 Task，下面挂多道关联题。当前先保留单题训练工作台，之后会升级成“大材料 + 多题组”的考试式界面。
+            </p>
+            <Link
+              href={PRACTICE_SESSIONS_HREF}
+              className="mt-3 inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-ink-muted transition-all hover:-translate-y-0.5 hover:border-accent/30 hover:bg-accent-tint hover:text-accent active:scale-[0.98]"
+            >
+              查看 Session Library
+              <ArrowRight size={13} weight="bold" />
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      <AnimatePresence initial={false}>
+        {message && (
+          <motion.p
+            initial={{ opacity: 0, y: reduceMotion ? 0 : -4 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            transition={springSnap}
+            role="status"
+            className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+          >
+            {message}
+          </motion.p>
+        )}
+      </AnimatePresence>
+
+      <motion.div
+        variants={staggerParent(0.06)}
+        initial="hidden"
+        animate="show"
+        className="grid grid-cols-1 gap-6 lg:grid-cols-12"
+      >
+        <motion.aside
+          variants={riseChild}
+          className="lg:col-span-5"
+        >
+          <div className="sticky top-6 overflow-hidden rounded-3xl border border-line bg-surface shadow-[0_18px_48px_-34px_rgba(24,24,27,0.35)]">
+            <div className="relative border-b border-line bg-ink p-5 text-white sm:p-6">
+              <div className="pointer-events-none absolute -right-14 -top-20 h-48 w-48 rounded-full bg-white/10 blur-3xl" aria-hidden="true" />
+              <div className="relative flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold tracking-wide text-white/50">训练任务</p>
+                  <h2 className="mt-2 text-2xl font-semibold">{sessionMode}</h2>
+                  <p className="mt-2 text-sm leading-relaxed text-white/60">
+                    {hasArticle
+                      ? '先浏览材料，再回到右侧完成作答。不要急着看答案，先定位依据。'
+                      : '这道题没有长材料，重点放在题干理解、答案表达和提交后的解析复盘。'}
+                  </p>
+                </div>
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-white">
+                  <ClipboardText size={22} weight="regular" />
+                </span>
+              </div>
+            </div>
+
+            {hasArticle ? (
+              <div className="max-h-[64dvh] overflow-y-auto p-5 sm:p-6">
+                <div className="mb-5 flex items-center gap-2 border-b border-line pb-3 text-sm font-semibold text-accent">
+                  <BookOpenText size={18} weight="regular" />
+                  阅读原文
+                </div>
+                <article
+                  className="text-sm leading-7 text-ink-muted"
+                  dangerouslySetInnerHTML={{ __html: question.article_content ?? '' }}
+                />
+                <div className="mt-6 grid grid-cols-3 gap-2 rounded-2xl border border-line bg-zinc-50 p-3">
+                  <SessionMetric label="本轮" value={String(sessionStats.attempts)} />
+                  <SessionMetric label="正确" value={sessionAccuracy === null ? '—' : `${sessionAccuracy}%`} />
+                  <SessionMetric label="连对" value={String(sessionStats.streak)} />
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4 p-5 sm:p-6">
+                <div className="rounded-2xl border border-line bg-zinc-50 p-4">
+                  <p className="text-xs font-semibold text-ink-subtle">作答策略</p>
+                  <p className="mt-2 text-sm leading-relaxed text-ink-muted">
+                    先判断题型要求，再提交最小确定答案。答错会自动进入错题本，方便之后集中复盘。
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-2xl border border-line bg-zinc-50 p-4">
+                    <p className="text-xs text-ink-subtle">题目分类</p>
+                    <p className="mt-2 font-semibold text-ink">{formatCategory(question.category)}</p>
+                  </div>
+                  <div className="rounded-2xl border border-line bg-zinc-50 p-4">
+                    <p className="text-xs text-ink-subtle">训练强度</p>
+                    <p className="mt-2 font-semibold text-ink">{formatDifficulty(question.difficulty)}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-2 rounded-2xl border border-line bg-white p-3">
+                  <SessionMetric label="本轮" value={String(sessionStats.attempts)} />
+                  <SessionMetric label="正确" value={sessionAccuracy === null ? '—' : `${sessionAccuracy}%`} />
+                  <SessionMetric label="连对" value={String(sessionStats.streak)} />
+                </div>
+              </div>
+            )}
+          </div>
+        </motion.aside>
+
+        <motion.section
+          variants={riseChild}
+          className="lg:col-span-7"
+        >
+          <div className="overflow-hidden rounded-3xl border border-line bg-surface shadow-[0_20px_50px_-30px_rgba(24,24,27,0.38)]">
+            <div className="border-b border-line px-5 py-6 sm:px-7 sm:py-7">
+              <div className="flex items-start justify-between gap-4">
+                <h1 className="text-tight text-xl font-semibold leading-snug text-ink sm:text-2xl">
                   {question.question_text}
-                </h2>
-                <button 
-                  onClick={toggleFavorite}
-                  className={`p-2 rounded-full transition-all ${
-                    isFavorited ? 'text-red-500 bg-red-50' : 'text-slate-300 hover:bg-slate-50'
+                </h1>
+                <button
+                  type="button"
+                  onClick={() => void toggleFavorite()}
+                  aria-pressed={isFavorited}
+                  aria-label={isFavorited ? '取消收藏' : '加入收藏'}
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors active:scale-[0.96] ${
+                    isFavorited
+                      ? 'bg-red-50 text-red-500'
+                      : 'text-ink-subtle hover:bg-accent-tint hover:text-accent'
                   }`}
-                  title="加入收藏"
                 >
-                  <Heart fill={isFavorited ? "currentColor" : "none"} size={24} />
+                  <Heart size={22} weight={isFavorited ? 'fill' : 'regular'} />
                 </button>
               </div>
             </div>
 
-            {/* 答题区 */}
-            <div className="p-6 sm:p-8 bg-slate-50/50">
-               {question.type === 'multiple_choice' && question.options ? (
-                 <div className="space-y-3">
-                   {question.options.map((opt, idx) => (
-                     <button
-                       key={idx}
-                       disabled={status !== 'idle'}
-                       onClick={() => setUserAnswer(opt)}
-                       className={`
-                         w-full text-left p-4 rounded-xl border-2 transition-all flex items-center
-                         ${userAnswer === opt 
-                           ? 'border-indigo-600 bg-indigo-50 text-indigo-900 shadow-sm' 
-                           : 'border-white bg-white text-slate-600 hover:border-indigo-200'
-                         }
-                         ${status !== 'idle' && userAnswer !== opt && 'opacity-50'}
-                       `}
-                     >
-                       <div className={`w-5 h-5 rounded-full border-2 mr-3 flex items-center justify-center
-                         ${userAnswer === opt ? 'border-indigo-600' : 'border-slate-300'}
-                       `}>
-                         {userAnswer === opt && <div className="w-2.5 h-2.5 rounded-full bg-indigo-600" />}
-                       </div>
-                       {opt}
-                     </button>
-                   ))}
-                 </div>
-               ) : (
-                 <input
-                   type="text"
-                   value={userAnswer}
-                   disabled={status !== 'idle'}
-                   onChange={(e) => setUserAnswer(e.target.value)}
-                   placeholder="请输入你的答案..."
-                   className="w-full p-4 text-lg border-2 border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-0 outline-none bg-white shadow-sm"
-                 />
-               )}
+            <div className="bg-zinc-50/70 px-5 py-6 sm:px-7 sm:py-7">
+              {question.type === 'multiple_choice' && question.options ? (
+                <div className="overflow-hidden rounded-3xl border border-line bg-surface" role="radiogroup" aria-label="选择答案">
+                  {question.options.map((option, index) => {
+                    const selected = userAnswer === option;
+                    const marker = String.fromCharCode(65 + index);
+                    return (
+                      <button
+                        key={`${option}-${index}`}
+                        type="button"
+                        role="radio"
+                        aria-checked={selected}
+                        disabled={answered}
+                        onClick={() => setUserAnswer(option)}
+                        className={`group/option flex w-full items-start gap-4 border-b border-line px-4 py-4 text-left text-sm transition-colors last:border-b-0 active:scale-[0.995] disabled:cursor-default ${
+                          selected
+                            ? 'bg-accent-tint text-ink'
+                            : 'text-ink-muted hover:bg-white hover:text-ink'
+                        } ${answered && !selected ? 'opacity-50' : ''}`}
+                      >
+                        <span
+                          className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-semibold transition-colors ${
+                            selected
+                              ? 'border-accent bg-accent text-white'
+                              : 'border-zinc-300 bg-zinc-50 text-ink-subtle group-hover/option:border-accent/35 group-hover/option:text-accent'
+                          }`}
+                          aria-hidden="true"
+                        >
+                          {marker}
+                        </span>
+                        <span className="leading-relaxed">{option}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <label className="block">
+                  <span className="mb-2 block text-sm font-semibold text-ink">你的答案</span>
+                  <input
+                    type="text"
+                    value={userAnswer}
+                    disabled={answered}
+                    onChange={(event) => setUserAnswer(event.target.value)}
+                    placeholder="请输入你的答案..."
+                    className="w-full rounded-2xl border border-line bg-surface px-4 py-4 text-lg text-ink shadow-[0_6px_20px_-18px_rgba(24,24,27,0.45)] outline-none transition-colors placeholder:text-ink-subtle focus:border-accent disabled:cursor-default disabled:bg-zinc-100"
+                  />
+                </label>
+              )}
 
-               {status === 'idle' && (
-                 <button
-                   onClick={handleSubmit}
-                   disabled={!userAnswer.trim() || saving}
-                   className="mt-8 w-full bg-slate-900 hover:bg-slate-800 disabled:bg-slate-300 text-white font-bold py-4 rounded-xl shadow-lg shadow-slate-200 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
-                 >
-                   {saving && <Loader2 className="animate-spin" />} 提交答案 (Enter)
-                 </button>
-               )}
+              {status === 'idle' && (
+                <button
+                  type="button"
+                  onClick={() => void handleSubmit()}
+                  disabled={!userAnswer.trim() || saving}
+                  className="mt-7 flex w-full items-center justify-center gap-2 rounded-2xl bg-ink px-5 py-4 text-sm font-semibold text-white shadow-[0_18px_36px_-24px_rgba(24,24,27,0.8)] transition-colors hover:bg-zinc-800 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-zinc-300 disabled:text-zinc-500"
+                >
+                  {saving && <CircleNotch size={17} weight="bold" className="animate-spin" />}
+                  提交答案 (Enter)
+                </button>
+              )}
             </div>
 
-            {/* 结果反馈区 */}
-            {status !== 'idle' && (
-              <div className={`
-                p-6 sm:p-8 border-t-4 animate-in slide-in-from-bottom-4 duration-500
-                ${status === 'correct' ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'}
-              `}>
-                <div className="flex gap-4">
-                  <div className={`mt-1 p-2 rounded-full ${status === 'correct' ? 'bg-green-200 text-green-700' : 'bg-red-200 text-red-700'}`}>
-                    {status === 'correct' ? <CheckCircle2 /> : <XCircle />}
+            <AnimatePresence initial={false}>
+              {answered && (
+                <motion.div
+                  initial={{ opacity: 0, y: reduceMotion ? 0 : 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={springSoft}
+                  role="status"
+                  className={`border-t px-5 py-6 sm:px-7 sm:py-7 ${
+                    status === 'correct'
+                      ? 'border-emerald-200 bg-emerald-50'
+                      : 'border-red-200 bg-red-50'
+                  }`}
+                >
+                  <div className="flex gap-4">
+                    <span
+                      className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${
+                        status === 'correct'
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : 'bg-red-100 text-red-700'
+                      }`}
+                    >
+                      {status === 'correct' ? (
+                        <CheckCircle size={22} weight="bold" />
+                      ) : (
+                        <XCircle size={22} weight="bold" />
+                      )}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-semibold tracking-wide text-ink-subtle">Answer Inspector</p>
+                      <h2
+                        className={`mt-1 text-lg font-semibold ${
+                          status === 'correct' ? 'text-emerald-900' : 'text-red-900'
+                        }`}
+                      >
+                        {status === 'correct' ? '回答正确，记录已保存' : '回答错误，已加入复盘队列'}
+                      </h2>
+
+                      <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                        <div className="rounded-2xl border border-white/70 bg-white/65 p-4">
+                          <p className="text-xs font-semibold text-ink-subtle">你的答案</p>
+                          <p className="mt-1 font-semibold text-ink">{userAnswer}</p>
+                        </div>
+                        <div className="rounded-2xl border border-white/70 bg-white/65 p-4">
+                          <p className="text-xs font-semibold text-ink-subtle">正确答案</p>
+                          <p className="mt-1 font-semibold text-ink">{question.correct_answer}</p>
+                        </div>
+                      </div>
+
+                      {question.explanation && (
+                        <div className="mt-4 rounded-2xl border border-white/70 bg-white/65 p-4 text-sm leading-relaxed text-ink-muted">
+                          <span className="font-semibold text-ink">解析：</span>
+                          {question.explanation}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <h3 className={`text-lg font-bold mb-1 ${status === 'correct' ? 'text-green-800' : 'text-red-800'}`}>
-                      {status === 'correct' ? '回答正确！' : '回答错误'}
-                    </h3>
-                    
+
+                  <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
                     {status === 'wrong' && (
-                      <div className="mb-4">
-                        <span className="text-sm text-slate-500">正确答案：</span>
-                        <div className="font-bold text-slate-900 text-lg">{question.correct_answer}</div>
-                      </div>
+                      <Link
+                        href="/wrong-book"
+                        className="rounded-full border border-line bg-surface px-5 py-3 text-center text-sm font-semibold text-ink-muted transition-colors hover:border-red-200 hover:bg-white hover:text-red-700 active:scale-[0.98]"
+                      >
+                        稍后集中复盘
+                      </Link>
                     )}
-
-                    {question.explanation && (
-                      <div className="bg-white/60 p-4 rounded-lg text-sm text-slate-600 leading-relaxed border border-black/5">
-                        <span className="font-bold text-slate-900">解析：</span> {question.explanation}
-                      </div>
-                    )}
+                    <button
+                      type="button"
+                      onClick={() => void toggleFavorite()}
+                      className="flex items-center justify-center gap-2 rounded-full border border-line bg-surface px-5 py-3 text-sm font-semibold text-ink-muted transition-colors hover:border-accent/30 hover:bg-white hover:text-accent active:scale-[0.98]"
+                    >
+                      <Heart size={17} weight={isFavorited ? 'fill' : 'regular'} />
+                      {isFavorited ? '已收藏' : '收藏此题'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => void fetchQuestion()}
+                      className="flex items-center justify-center gap-2 rounded-full border border-line bg-surface px-5 py-3 text-sm font-semibold text-ink transition-colors hover:border-zinc-300 hover:bg-zinc-50 active:scale-[0.98]"
+                    >
+                      下一题 (Space)
+                      <ArrowRight size={17} weight="bold" />
+                    </button>
                   </div>
-                </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </motion.section>
+      </motion.div>
+    </main>
+  );
+}
 
-                <div className="mt-6 flex justify-end">
-                  <button
-                    onClick={fetchQuestion}
-                    className="flex items-center gap-2 px-6 py-3 bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-800 font-bold rounded-xl shadow-sm transition-all"
-                  >
-                    下一题 (Space) <ArrowRight size={18} />
-                  </button>
-                </div>
-              </div>
-            )}
+function SessionMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-xl bg-white px-3 py-2 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
+      <p className="text-lg font-semibold tabular-nums text-ink">{value}</p>
+      <p className="mt-0.5 text-[11px] font-medium text-ink-subtle">{label}</p>
+    </div>
+  );
+}
 
+function PracticeSkeleton() {
+  return (
+    <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8" aria-label="正在加载题目">
+      <div className="mb-6 flex items-center justify-between">
+        <div className="h-10 w-28 animate-pulse rounded-full bg-zinc-200" />
+        <div className="flex gap-2">
+          <div className="h-7 w-16 animate-pulse rounded-full bg-zinc-200" />
+          <div className="h-7 w-16 animate-pulse rounded-full bg-zinc-200" />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        <div className="hidden rounded-3xl border border-line bg-surface p-6 lg:col-span-6 lg:block">
+          <div className="mb-5 h-5 w-24 animate-pulse rounded bg-zinc-200" />
+          <div className="space-y-3">
+            {Array.from({ length: 9 }).map((_, index) => (
+              <div
+                key={index}
+                className="h-4 animate-pulse rounded bg-zinc-200"
+                style={{ width: `${92 - (index % 4) * 9}%` }}
+              />
+            ))}
+          </div>
+        </div>
+        <div className="rounded-3xl border border-line bg-surface lg:col-span-6">
+          <div className="border-b border-line p-7">
+            <div className="h-7 w-4/5 animate-pulse rounded bg-zinc-200" />
+            <div className="mt-3 h-7 w-2/3 animate-pulse rounded bg-zinc-200" />
+          </div>
+          <div className="space-y-3 bg-zinc-50/70 p-7">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div key={index} className="h-14 animate-pulse rounded-2xl bg-zinc-200" />
+            ))}
+            <div className="mt-7 h-14 animate-pulse rounded-2xl bg-zinc-300" />
           </div>
         </div>
       </div>
-    </div>
+    </main>
+  );
+}
+
+type NoticeIcon = typeof WarningCircle;
+
+function PracticeNotice({
+  icon: Icon,
+  title,
+  description,
+  actionLabel,
+  onAction,
+  secondaryLabel,
+  onSecondary,
+}: {
+  icon: NoticeIcon;
+  title: string;
+  description: string;
+  actionLabel: string;
+  onAction: () => void;
+  secondaryLabel?: string;
+  onSecondary?: () => void;
+}) {
+  return (
+    <main className="mx-auto flex min-h-[70dvh] max-w-5xl items-center px-4 py-10 sm:px-6 lg:px-8">
+      <div className="max-w-md border-t border-line pt-10">
+        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-accent-tint text-accent">
+          <Icon size={23} weight="regular" />
+        </span>
+        <h1 className="mt-5 text-2xl font-semibold text-ink">{title}</h1>
+        <p className="mt-2 text-sm leading-relaxed text-ink-subtle">{description}</p>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={onAction}
+            className="rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 active:scale-[0.98]"
+          >
+            {actionLabel}
+          </button>
+          {secondaryLabel && onSecondary && (
+            <button
+              type="button"
+              onClick={onSecondary}
+              className="rounded-full border border-line bg-surface px-5 py-2.5 text-sm font-semibold text-ink-muted transition-colors hover:text-ink active:scale-[0.98]"
+            >
+              {secondaryLabel}
+            </button>
+          )}
+        </div>
+      </div>
+    </main>
   );
 }

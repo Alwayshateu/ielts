@@ -1,0 +1,110 @@
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useState } from 'react';
+import {
+  BookOpenText,
+  ChartLineUp,
+  ClipboardText,
+  Gauge,
+  Heart,
+  ListChecks,
+  Target,
+} from '@phosphor-icons/react';
+import { readPracticeSessionDraftStatuses } from '@/lib/practice-session-draft';
+import { getPracticeLearningSummary } from '@/lib/practice-session-recommendations';
+import { getSamplePracticeUnits } from '@/lib/practice-session-samples';
+
+const NAV_ITEMS = [
+  { href: '/dashboard', label: 'Dashboard', Icon: Gauge, match: (path: string) => path === '/dashboard' },
+  { href: '/practice', label: '单题练习', Icon: Target, match: (path: string) => path === '/practice' },
+  {
+    href: '/practice/sessions',
+    label: 'Sessions',
+    Icon: BookOpenText,
+    match: (path: string) => path.startsWith('/practice/session'),
+    session: true,
+  },
+  {
+    href: '/practice/history',
+    label: '复盘轨迹',
+    Icon: ChartLineUp,
+    match: (path: string) => path.startsWith('/practice/history'),
+  },
+  { href: '/wrong-book', label: '错题本', Icon: ClipboardText, match: (path: string) => path === '/wrong-book' },
+  { href: '/favorites', label: '收藏', Icon: Heart, match: (path: string) => path === '/favorites' },
+];
+
+function getSessionNavStatus() {
+  const units = getSamplePracticeUnits();
+  const statuses = readPracticeSessionDraftStatuses(units);
+  const summary = getPracticeLearningSummary(statuses);
+
+  if (summary.needsReview > 0) {
+    return { label: `${summary.needsReview} 复盘`, tone: 'sky' as const };
+  }
+  if (summary.inProgress > 0) {
+    return { label: `${summary.inProgress} 草稿`, tone: 'amber' as const };
+  }
+  if (summary.checked > 0) {
+    return { label: `${summary.checked} 已查`, tone: 'emerald' as const };
+  }
+
+  return null;
+}
+
+function sessionBadgeClass(tone: 'sky' | 'amber' | 'emerald', active: boolean) {
+  if (active) return 'border-white/60 bg-white/70 text-accent';
+
+  return {
+    sky: 'border-sky-200 bg-sky-50 text-sky-700',
+    amber: 'border-amber-200 bg-amber-50 text-amber-700',
+    emerald: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+  }[tone];
+}
+
+export default function AppQuickNav() {
+  const pathname = usePathname();
+  const [sessionStatus] = useState(getSessionNavStatus);
+
+  return (
+    <nav className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8" aria-label="主要学习入口">
+      <div className="flex items-center gap-2 overflow-x-auto rounded-full border border-line bg-surface/85 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.78),0_18px_44px_-36px_rgba(24,24,27,0.35)] backdrop-blur">
+        <span className="hidden items-center gap-2 rounded-full bg-ink px-3 py-2 text-xs font-semibold text-white sm:flex">
+          <ListChecks size={14} weight="regular" />
+          Study Loop
+          {sessionStatus && (
+            <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] text-white/75">
+              {sessionStatus.label}
+            </span>
+          )}
+        </span>
+        {NAV_ITEMS.map(({ href, label, Icon, match, session }) => {
+          const active = match(pathname);
+
+          return (
+            <Link
+              key={href}
+              href={href}
+              aria-current={active ? 'page' : undefined}
+              className={`flex shrink-0 items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold transition-all active:scale-[0.98] ${
+                active
+                  ? 'bg-accent-tint text-accent shadow-[inset_0_1px_0_rgba(255,255,255,0.78)]'
+                  : 'text-ink-subtle hover:bg-zinc-50 hover:text-ink'
+              }`}
+            >
+              <Icon size={14} weight={active ? 'bold' : 'regular'} />
+              {label}
+              {session && sessionStatus && (
+                <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${sessionBadgeClass(sessionStatus.tone, active)}`}>
+                  {sessionStatus.label}
+                </span>
+              )}
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}

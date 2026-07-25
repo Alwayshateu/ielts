@@ -1,5 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase-server'; 
 import { redirect } from 'next/navigation';
+import AppQuickNav from '../components/AppQuickNav';
 import PracticeView from '../components/PracticeView';
 
 // 强制动态渲染，防止 SSR 缓存问题
@@ -20,7 +21,8 @@ export default async function PracticePage() {
 
   // 4. 渲染客户端组件，传入 userId 用于记录数据
   return (
-    <div className="min-h-screen bg-[#f8f9fa] pt-4 pb-10">
+    <div className="min-h-[100dvh] bg-canvas pb-10 pt-4">
+      <AppQuickNav />
       <PracticeView userId={user.id} />
     </div>
   );
