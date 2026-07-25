@@ -2,11 +2,12 @@
 
 import { BookOpenText, CheckCircle } from '@phosphor-icons/react';
 import { motion, useReducedMotion } from 'motion/react';
-import type { IeltsQuestion } from '@/lib/types';
+import type { CollectionItem } from '@/lib/collection-items';
 import { springSoft } from '../ui/motion-presets';
 
-export default function QuestionDetails({ question }: { question: IeltsQuestion }) {
+export default function QuestionDetails({ question }: { question: CollectionItem }) {
   const reduce = useReducedMotion();
+  const showOptions = Boolean(question.options?.length);
 
   return (
     <motion.div
@@ -16,10 +17,10 @@ export default function QuestionDetails({ question }: { question: IeltsQuestion 
       transition={springSoft}
       className="border-t border-line bg-zinc-50/80 px-5 py-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] sm:px-7"
     >
-      {question.type === 'multiple_choice' && question.options && (
+      {showOptions && (
         <div className="mb-7 grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {question.options.map((option) => {
-            const correct = option === question.correct_answer;
+          {question.options!.map((option) => {
+            const correct = option === question.answer;
             return (
               <div
                 key={option}
@@ -41,8 +42,12 @@ export default function QuestionDetails({ question }: { question: IeltsQuestion 
           <CheckCircle size={17} weight="bold" />
         </span>
         <div>
-          <p className="text-xs font-semibold tracking-wide text-ink-subtle">正确答案</p>
-          <p className="mt-1 font-semibold text-ink">{question.correct_answer}</p>
+          <p className="text-xs font-semibold tracking-wide text-ink-subtle">
+            {question.answer ? '正确答案' : '参考答案'}
+          </p>
+          <p className="mt-1 font-semibold text-ink">
+            {question.answer || '这类题目需要人工评分，没有唯一答案'}
+          </p>
         </div>
       </div>
 
@@ -55,7 +60,7 @@ export default function QuestionDetails({ question }: { question: IeltsQuestion 
         </div>
       )}
 
-      {question.article_content && (
+      {question.articleContent && (
         <section className="mt-6 border-t border-line pt-5" aria-label="相关原文">
           <h3 className="flex items-center gap-2 text-sm font-semibold text-ink">
             <BookOpenText size={17} weight="regular" />
@@ -63,7 +68,7 @@ export default function QuestionDetails({ question }: { question: IeltsQuestion 
           </h3>
           <div
             className="mt-3 max-h-48 overflow-y-auto rounded-xl border border-line bg-surface p-4 text-sm leading-relaxed text-ink-muted"
-            dangerouslySetInnerHTML={{ __html: question.article_content }}
+            dangerouslySetInnerHTML={{ __html: question.articleContent }}
           />
         </section>
       )}

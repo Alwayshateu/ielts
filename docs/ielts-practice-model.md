@@ -862,8 +862,34 @@ else:
 已完成但不在原清单里的：Exam Mode（限时 + 自动交卷）、Writing 反馈面板（字数 / 句长 /
 结构 checklist）、单次 attempt 详情页（逐题回顾 + 与历史对比）。
 
-后续候选：Dashboard 接 DB session stats、错题本联动、annotations 持久化到
-`practice_annotations`。
+后续候选：annotations 持久化到 `practice_annotations`、Listening 换成真人录音、
+把 legacy 单题流程和 Session 流程合并成一个入口。
+
+## 14. 两套流程的合并状态
+
+历史上有两套并行系统：legacy 单题练习（`ielts_questions` + `history` / `wrong_book` /
+`favorites`）和 Practice Session（`practice_*`）。它们曾经完全隔离 —— Session 里做错的题
+进不了错题本，因为那三张表的 `question_id` 是硬外键指向 `ielts_questions`，**结构上**存
+不进 practice 题目。
+
+`migrations/0003_link_collections_to_practice.sql` 解决了这一点：三张表各加一个可空的
+`practice_question_id`，`question_id` 改为可空，加 check 约束保证二者恰有其一。已有行不
+受影响（保持 `question_id` 有值、`practice_question_id` 为 null）。
+
+```text
+src/lib/collection-items.ts       -- 两种题目模型 → 统一的 CollectionItem 卡片
+src/lib/question-collections.ts   -- 双源读取、写入、幂等保存
+src/lib/dashboard-recommendation.ts -- 把两路信号收敛成一个「下一步做什么」
+```
+
+开关：`NEXT_PUBLIC_PRACTICE_COLLECTION_LINK=on`。关闭时（migration 未应用）错题本和收藏
+只读 legacy 部分，功能不受影响。practice 那半边读取失败也只是降级 —— legacy 卡片照常渲染，
+页面上给一条提示，不会整页报错。
+
+Dashboard 之前有两套互相矛盾的展示：legacy 统计卡显示「0 次练习」的同时，紧挨着的 Session
+卡显示真实的连续天数；两张推荐卡各自独立计算，可能给出冲突建议。现在推荐收敛为一张
+（`resolveDashboardRecommendation`，按「未完成草稿 &gt; 待复盘 &gt; 错题 &gt; 新手 &gt; 常规」排序），
+统计卡也会同时反映两套流程。
 14. AI feedback。
 
 ## 14. 非目标

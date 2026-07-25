@@ -1,19 +1,13 @@
 'use client';
 
-import type { IeltsQuestion } from '@/lib/types';
+import type { CollectionItem } from '@/lib/collection-items';
 import ReviewCollectionView from './questions/ReviewCollectionView';
 
 interface FavoritesViewProps {
-  initialQuestions: IeltsQuestion[];
-  userId: string;
+  initialItems: CollectionItem[];
+  degraded?: boolean;
 }
 
-export default function FavoritesView({ initialQuestions, userId }: FavoritesViewProps) {
-  return (
-    <ReviewCollectionView
-      kind="favorites"
-      initialQuestions={initialQuestions}
-      userId={userId}
-    />
-  );
+export default function FavoritesView({ initialItems, degraded }: FavoritesViewProps) {
+  return <ReviewCollectionView kind="favorites" initialItems={initialItems} degraded={degraded} />;
 }

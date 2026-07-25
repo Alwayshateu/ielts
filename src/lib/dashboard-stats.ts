@@ -1,13 +1,18 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 export type DashboardStats = {
+  /** Single-question attempts recorded in the legacy history table. */
   totalAttempts: number;
   correctAttempts: number;
   accuracy: number | null;
   recentAttempts: number;
+  /** Counts cover both question models once migration 0003 is applied. */
   wrongBookCount: number;
   favoritesCount: number;
   lastPracticedAt: string | null;
+  /** Practice sessions synced to the cloud; 0 when the user only practises locally. */
+  sessionAttempts: number;
+  sessionAccuracy: number | null;
   statsError: string | null;
 };
 
@@ -19,6 +24,8 @@ const EMPTY_STATS: DashboardStats = {
   wrongBookCount: 0,
   favoritesCount: 0,
   lastPracticedAt: null,
+  sessionAttempts: 0,
+  sessionAccuracy: null,
   statsError: null,
 };
 
@@ -74,6 +81,23 @@ export async function getDashboardStats(
   const correctAttempts = attempts.filter((attempt) => Boolean(attempt.is_correct)).length;
   const totalAttempts = attempts.length;
 
+  // Practice-session attempts live in their own table and may not exist yet (migration
+  // 0001 unapplied, or the user never synced). A failure here must not blank the whole
+  // overview, so it degrades to zero instead of propagating.
+  const sessionResult = await supabase
+    .from('practice_attempts')
+    .select('score')
+    .eq('user_id', userId)
+    .not('score', 'is', null)
+    .order('started_at', { ascending: false })
+    .limit(500);
+
+  const sessionScores = sessionResult.error
+    ? []
+    : (sessionResult.data ?? [])
+        .map((row) => Number(row.score))
+        .filter((score) => Number.isFinite(score));
+
   return {
     totalAttempts,
     correctAttempts,
@@ -82,6 +106,10 @@ export async function getDashboardStats(
     wrongBookCount: wrongBookResult.count ?? 0,
     favoritesCount: favoritesResult.count ?? 0,
     lastPracticedAt: attempts[0]?.created_at ?? null,
+    sessionAttempts: sessionScores.length,
+    sessionAccuracy: sessionScores.length
+      ? Math.round(sessionScores.reduce((sum, score) => sum + score, 0) / sessionScores.length)
+      : null,
     statsError: null,
   };
 }

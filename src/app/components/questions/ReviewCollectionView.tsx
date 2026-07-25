@@ -12,9 +12,10 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
+import { countCollectionSources, type CollectionItem } from '@/lib/collection-items';
 import { formatCategory, formatDifficulty } from '@/lib/question-labels';
 import { PRACTICE_SESSIONS_HREF } from '@/lib/practice-session-links';
-import type { IeltsQuestion } from '@/lib/types';
+import { removeCollectionItem } from '@/lib/question-collections';
 import EmptyState from '../ui/EmptyState';
 import { riseChild, springSnap, staggerParent } from '../ui/motion-presets';
 import QuestionDetails from './QuestionDetails';
@@ -23,8 +24,8 @@ type CollectionKind = 'favorites' | 'wrong-book';
 
 type ReviewCollectionViewProps = {
   kind: CollectionKind;
-  initialQuestions: IeltsQuestion[];
-  userId: string;
+  initialItems: CollectionItem[];
+  degraded?: boolean;
 };
 
 const COLLECTION_COPY = {
@@ -58,55 +59,57 @@ const COLLECTION_COPY = {
 
 export default function ReviewCollectionView({
   kind,
-  initialQuestions,
-  userId,
+  initialItems,
+  degraded = false,
 }: ReviewCollectionViewProps) {
   const router = useRouter();
   const reduceMotion = useReducedMotion();
   const copy = COLLECTION_COPY[kind];
   const Icon = copy.icon;
   const needsConfirmation = kind === 'wrong-book';
-  const [questions, setQuestions] = useState(initialQuestions);
+  const [items, setItems] = useState(initialItems);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const toggleExpanded = (questionId: string) => {
-    setExpandedId((current) => (current === questionId ? null : questionId));
+  const sources = countCollectionSources(items);
+
+  const toggleExpanded = (entryId: string) => {
+    setExpandedId((current) => (current === entryId ? null : entryId));
   };
 
-  const requestRemoval = (questionId: string) => {
+  const requestRemoval = (entryId: string) => {
     setError(null);
 
     if (needsConfirmation) {
-      setConfirmingId(questionId);
+      setConfirmingId(entryId);
       return;
     }
 
-    void removeQuestion(questionId);
+    void removeItem(entryId);
   };
 
-  const removeQuestion = async (questionId: string) => {
-    setRemovingId(questionId);
+  const removeItem = async (entryId: string) => {
+    setRemovingId(entryId);
     setError(null);
 
-    const supabase = createSupabaseBrowserClient();
-    const { error: removeError } = await supabase
-      .from(copy.table)
-      .delete()
-      .eq('user_id', userId)
-      .eq('question_id', questionId);
+    // Addressed by row id, so this works identically for legacy and practice entries.
+    const removeError = await removeCollectionItem(
+      createSupabaseBrowserClient(),
+      copy.table,
+      entryId
+    );
 
     if (removeError) {
-      console.error(`Failed to remove question from ${copy.table}`, removeError);
+      console.error(`Failed to remove entry from ${copy.table}`, removeError);
       setError(copy.errorMessage);
       setRemovingId(null);
       return;
     }
 
-    setQuestions((current) => current.filter((question) => question.id !== questionId));
-    setExpandedId((current) => (current === questionId ? null : current));
+    setItems((current) => current.filter((item) => item.entryId !== entryId));
+    setExpandedId((current) => (current === entryId ? null : current));
     setConfirmingId(null);
     setRemovingId(null);
   };
@@ -133,7 +136,13 @@ export default function ReviewCollectionView({
             <div>
               <p className="text-xs font-semibold tracking-wide text-ink-subtle">Review Collection</p>
               <h1 className="text-tight mt-2 text-3xl font-semibold text-ink">{copy.title}</h1>
-              <p className="mt-2 text-sm text-ink-subtle">{copy.count(questions.length)}</p>
+              <p className="mt-2 text-sm text-ink-subtle">{copy.count(sources.total)}</p>
+              {sources.practice > 0 && (
+                <p className="mt-1 text-xs text-ink-muted">
+                  其中 {sources.practice} 道来自 Session 训练
+                  {sources.legacy > 0 && `，${sources.legacy} 道来自单题练习`}
+                </p>
+              )}
             </div>
           </div>
         </motion.div>
@@ -165,10 +174,16 @@ export default function ReviewCollectionView({
       >
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-xs font-semibold tracking-wide text-emerald-700">Session 本地复盘</p>
-            <h2 className="mt-2 text-xl font-semibold text-emerald-950">错因标签和 rubric 自评在 Session 里继续完成</h2>
+            <p className="text-xs font-semibold tracking-wide text-emerald-700">Session 训练</p>
+            <h2 className="mt-2 text-xl font-semibold text-emerald-950">
+              {sources.practice > 0
+                ? '单题练习和 Session 的记录已经合并在这里'
+                : '在 Session 里做题也会记录到这里'}
+            </h2>
             <p className="mt-2 max-w-2xl text-sm leading-relaxed text-emerald-800/75">
-              这里保留旧题库收藏和错题本。完整 Session 的标记、笔记、错因标签和 Writing / Speaking 自评目前保存在本机浏览器。
+              {kind === 'wrong-book'
+                ? '两套流程的错题现在共用同一个错题本。Session 里的错因标签和 Writing / Speaking 自评仍保存在本机浏览器。'
+                : '两套流程的收藏现在共用同一个收藏夹。Session 里的标记和笔记仍保存在本机浏览器。'}
             </p>
           </div>
           <Link
@@ -179,6 +194,15 @@ export default function ReviewCollectionView({
           </Link>
         </div>
       </motion.section>
+
+      {degraded && (
+        <p
+          role="status"
+          className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+        >
+          Session 来源的记录暂时读取失败，下面只显示单题练习的部分。刷新可以重试。
+        </p>
+      )}
 
       <AnimatePresence initial={false}>
         {error && (
@@ -195,7 +219,7 @@ export default function ReviewCollectionView({
         )}
       </AnimatePresence>
 
-      {questions.length === 0 ? (
+      {items.length === 0 ? (
         <EmptyState
           icon={Icon}
           title={copy.emptyTitle}
@@ -210,16 +234,16 @@ export default function ReviewCollectionView({
           animate="show"
           className="overflow-hidden rounded-[2rem] border border-line bg-surface shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_20px_54px_-34px_rgba(24,24,27,0.30)]"
         >
-          {questions.map((question, index) => {
-            const expanded = expandedId === question.id;
-            const confirming = confirmingId === question.id;
-            const removing = removingId === question.id;
-            const detailsId = `question-details-${question.id}`;
-            const confirmationId = `remove-confirmation-${question.id}`;
+          {items.map((item, index) => {
+            const expanded = expandedId === item.entryId;
+            const confirming = confirmingId === item.entryId;
+            const removing = removingId === item.entryId;
+            const detailsId = `question-details-${item.entryId}`;
+            const confirmationId = `remove-confirmation-${item.entryId}`;
 
             return (
               <motion.article
-                key={question.id}
+                key={item.entryId}
                 layout
                 variants={riseChild}
                 whileHover={{ y: -3 }}
@@ -234,22 +258,35 @@ export default function ReviewCollectionView({
                     <div className="min-w-0 flex-1">
                       <div className="mb-3 flex flex-wrap items-center gap-2">
                         <span className="rounded-full bg-accent-tint px-2.5 py-1 text-xs font-semibold text-accent">
-                          {formatCategory(question.category)}
+                          {formatCategory(item.category)}
                         </span>
                         <span className="rounded-full bg-zinc-100 px-2.5 py-1 text-xs font-semibold text-ink-muted">
-                          {formatDifficulty(question.difficulty)}
+                          {formatDifficulty(item.difficulty)}
                         </span>
+                        {item.source === 'practice' && (
+                          <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                            {item.unitTitle ?? 'Session'}
+                          </span>
+                        )}
                       </div>
                       <h2 className="text-base font-semibold leading-relaxed text-ink transition-colors group-hover:text-accent sm:text-lg">
                         <span className="mr-2 text-ink-subtle">{index + 1}.</span>
-                        {question.question_text}
+                        {item.questionText}
                       </h2>
                     </div>
 
                     <div className="flex shrink-0 items-center gap-2">
+                      {item.href && (
+                        <Link
+                          href={item.href}
+                          className="flex items-center gap-1.5 rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium text-ink-muted shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] transition-all hover:-translate-y-0.5 hover:border-accent/30 hover:bg-accent-tint hover:text-accent active:scale-[0.98]"
+                        >
+                          去重练
+                        </Link>
+                      )}
                       <button
                         type="button"
-                        onClick={() => toggleExpanded(question.id)}
+                        onClick={() => toggleExpanded(item.entryId)}
                         aria-expanded={expanded}
                         aria-controls={detailsId}
                         className="flex items-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium text-ink-muted shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] transition-all hover:-translate-y-0.5 hover:border-accent/30 hover:bg-accent-tint hover:text-accent active:scale-[0.98]"
@@ -266,7 +303,7 @@ export default function ReviewCollectionView({
                       </button>
                       <button
                         type="button"
-                        onClick={() => requestRemoval(question.id)}
+                        onClick={() => requestRemoval(item.entryId)}
                         disabled={removing}
                         aria-label={copy.removeLabel}
                         aria-controls={needsConfirmation ? confirmationId : undefined}
@@ -308,7 +345,7 @@ export default function ReviewCollectionView({
                           </button>
                           <button
                             type="button"
-                            onClick={() => void removeQuestion(question.id)}
+                            onClick={() => void removeItem(item.entryId)}
                             disabled={removing}
                             className="flex items-center gap-2 rounded-full bg-ink px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 active:scale-[0.98] disabled:cursor-wait disabled:opacity-60"
                           >
@@ -324,7 +361,7 @@ export default function ReviewCollectionView({
                 <AnimatePresence initial={false}>
                   {expanded && (
                     <div id={detailsId}>
-                      <QuestionDetails question={question} />
+                      <QuestionDetails question={item} />
                     </div>
                   )}
                 </AnimatePresence>

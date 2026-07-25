@@ -22,6 +22,7 @@ import {
   Target,
 } from '@phosphor-icons/react';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
+import { resolveDashboardRecommendation } from '@/lib/dashboard-recommendation';
 import type { DashboardStats } from '@/lib/dashboard-stats';
 import { PRACTICE_HISTORY_HREF, PRACTICE_SESSIONS_HREF } from '@/lib/practice-session-links';
 import { readPracticeSessionDraftStatuses } from '@/lib/practice-session-draft';
@@ -32,7 +33,6 @@ import {
 } from '@/lib/practice-session-history';
 import {
   getPracticeLearningSummary,
-  getPracticeRecommendationReason,
   getRecommendedPracticeUnits,
 } from '@/lib/practice-session-recommendations';
 import { getSamplePracticeUnits } from '@/lib/practice-session-samples';
@@ -213,39 +213,6 @@ export default function DashboardContent({
     ? '测试管理员'
     : profile.username || profile.email?.split('@')[0] || '学员';
 
-  const recommendation = useMemo(() => {
-    if (stats.wrongBookCount > 0) {
-      return {
-        eyebrow: '今日建议',
-        title: '先把错题队列清一遍',
-        desc: `还有 ${stats.wrongBookCount} 道题值得复盘。先减少不确定性，再进入新题练习。`,
-        href: '/wrong-book',
-        label: '复习错题',
-        Icon: ClipboardText,
-      };
-    }
-
-    if (stats.totalAttempts === 0) {
-      return {
-        eyebrow: '今日建议',
-        title: '先完成一次 5 分钟热身',
-        desc: '系统会从综合题库开始记录你的正确率，之后再根据历史表现安排复盘。',
-        href: `/practice?category=mixed&difficulty=${difficulty}`,
-        label: '开始综合练习',
-        Icon: Lightning,
-      };
-    }
-
-    return {
-      eyebrow: '今日建议',
-      title: '继续做一组进阶练习',
-      desc: '你的基础闭环已经跑通。保持低摩擦、高频率，比一次性刷很多题更稳定。',
-      href: `/practice?category=mixed&difficulty=${difficulty}`,
-      label: '继续训练',
-      Icon: Target,
-    };
-  }, [difficulty, stats.totalAttempts, stats.wrongBookCount]);
-
   const sessionRecommendation = useMemo(
     () => getRecommendedPracticeUnits(practiceSessionUnits, practiceSessionStatuses, 1)[0] ?? null,
     [practiceSessionStatuses, practiceSessionUnits]
@@ -254,9 +221,45 @@ export default function DashboardContent({
     () => getPracticeLearningSummary(practiceSessionStatuses),
     [practiceSessionStatuses]
   );
-  const sessionRecommendationReason = sessionRecommendation
-    ? getPracticeRecommendationReason(sessionRecommendation, practiceSessionStatuses[sessionRecommendation.id])
-    : null;
+
+  // One decision from both signals — legacy stats and local session state — so the page
+  // can never show two "do this next" cards that disagree.
+  const recommendation = useMemo(() => {
+    const resolved = resolveDashboardRecommendation({
+      sessionsInProgress: sessionLearningSummary.inProgress,
+      sessionsNeedingReview: sessionLearningSummary.needsReview,
+      wrongBookCount: stats.wrongBookCount,
+      legacyAttempts: stats.totalAttempts,
+      sessionAttempts: practiceSessionHistory.length,
+    });
+
+    const sessionHref = sessionRecommendation
+      ? `/practice/session/${sessionRecommendation.slug}`
+      : PRACTICE_SESSIONS_HREF;
+
+    const routing: Record<typeof resolved.kind, { href: string; Icon: typeof Target }> = {
+      'resume-session': { href: sessionHref, Icon: Lightning },
+      'review-session': { href: sessionHref, Icon: Target },
+      'clear-wrong-book': { href: '/wrong-book', Icon: ClipboardText },
+      'first-session': { href: sessionHref, Icon: Lightning },
+      'keep-going': { href: sessionHref, Icon: Target },
+    };
+
+    return {
+      eyebrow: '今日建议',
+      title: resolved.title,
+      desc: resolved.description,
+      label: resolved.actionLabel,
+      ...routing[resolved.kind],
+    };
+  }, [
+    practiceSessionHistory.length,
+    sessionLearningSummary.inProgress,
+    sessionLearningSummary.needsReview,
+    sessionRecommendation,
+    stats.totalAttempts,
+    stats.wrongBookCount,
+  ]);
 
   const activeHint = DIFFICULTIES.find((d) => d.id === difficulty)?.hint;
   const difficultyTone = DIFFICULTY_TONE[difficulty];
@@ -410,9 +413,12 @@ export default function DashboardContent({
               </span>
               <div>
                 <p className="text-xs font-semibold tracking-wide text-emerald-700">Session 学习状态</p>
-                <h2 className="mt-2 text-2xl font-semibold text-ink">完整任务训练已经接入首页</h2>
+                <h2 className="mt-2 text-2xl font-semibold text-ink">你的练习进度</h2>
                 <p className="mt-2 text-sm leading-relaxed text-ink-subtle">
-                  这里读取本机 Session 草稿和复盘状态，帮你决定今天继续哪一组。当前只读 localStorage，不写数据库。
+                  草稿和复盘状态存在本机浏览器
+                  {stats.sessionAttempts > 0
+                    ? `，其中 ${stats.sessionAttempts} 次已备份到你的账号。`
+                    : '。在复盘轨迹页可以备份到你的账号。'}
                 </p>
               </div>
             </div>
@@ -453,31 +459,20 @@ export default function DashboardContent({
           variants={riseChild}
           initial="hidden"
           animate="show"
-          whileHover={{ y: -6, scale: 1.012 }}
-          whileTap={{ scale: 0.995 }}
-          transition={springSnap}
           className="relative overflow-hidden rounded-[2rem] border border-line bg-ink p-5 text-white shadow-[0_24px_60px_-38px_rgba(24,24,27,0.85)]"
         >
           <div className="pointer-events-none absolute -right-14 -top-20 h-52 w-52 rounded-full bg-white/10 blur-3xl" aria-hidden="true" />
-          <div className="relative flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-xs font-semibold tracking-wide text-white/50">下一组 Session</p>
-              <h2 className="mt-2 text-2xl font-semibold">
-                {sessionRecommendation?.title ?? '打开 Session Library'}
-              </h2>
-              <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/60">
-                {sessionRecommendationReason === 'review'
-                  ? '这组已经检查过，而且还有标记或笔记。建议先完成复盘。'
-                  : sessionRecommendationReason === 'continue'
-                    ? '这组已经开始但还没检查。继续完成草稿会比开新题更有效。'
-                    : '从完整 IELTS 任务开始，把材料、题组和复盘放在同一个练习现场。'}
-              </p>
-            </div>
+          <div className="relative">
+            <p className="text-xs font-semibold tracking-wide text-white/50">Session Library</p>
+            <h2 className="mt-2 text-2xl font-semibold">按技能挑一组练</h2>
+            <p className="mt-2 max-w-xl text-sm leading-relaxed text-white/60">
+              Reading passage、Listening section、Writing task、Speaking cue card —— 材料、题组和复盘都在同一个练习现场。
+            </p>
             <Link
-              href={sessionRecommendation ? `/practice/session/${sessionRecommendation.slug}` : PRACTICE_SESSIONS_HREF}
-              className="flex w-fit items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-ink transition-all hover:-translate-y-0.5 hover:bg-zinc-100 active:scale-[0.98]"
+              href={PRACTICE_SESSIONS_HREF}
+              className="mt-5 flex w-fit items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-ink transition-all hover:-translate-y-0.5 hover:bg-zinc-100 active:scale-[0.98]"
             >
-              {sessionRecommendationReason === 'review' ? '继续复盘' : sessionRecommendationReason === 'continue' ? '继续 Session' : '进入 Session'}
+              浏览全部 Session
               <ArrowRight size={16} weight="bold" />
             </Link>
           </div>

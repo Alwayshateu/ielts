@@ -1,19 +1,13 @@
 'use client';
 
-import type { IeltsQuestion } from '@/lib/types';
+import type { CollectionItem } from '@/lib/collection-items';
 import ReviewCollectionView from './questions/ReviewCollectionView';
 
 interface WrongBookViewProps {
-  initialQuestions: IeltsQuestion[];
-  userId: string;
+  initialItems: CollectionItem[];
+  degraded?: boolean;
 }
 
-export default function WrongBookView({ initialQuestions, userId }: WrongBookViewProps) {
-  return (
-    <ReviewCollectionView
-      kind="wrong-book"
-      initialQuestions={initialQuestions}
-      userId={userId}
-    />
-  );
+export default function WrongBookView({ initialItems, degraded }: WrongBookViewProps) {
+  return <ReviewCollectionView kind="wrong-book" initialItems={initialItems} degraded={degraded} />;
 }

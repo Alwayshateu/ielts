@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import AppQuickNav from '../components/AppQuickNav';
 import WrongBookView from '../components/WrongBookView';
-import { getQuestionsForCollection } from '@/lib/question-collections';
+import { getCollectionItems } from '@/lib/question-collections';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 
 export const dynamic = 'force-dynamic';
@@ -17,11 +17,7 @@ export default async function WrongBookPage() {
     redirect('/login');
   }
 
-  const { questions, error } = await getQuestionsForCollection(
-    supabase,
-    'wrong_book',
-    user.id
-  );
+  const { items, error, partialError } = await getCollectionItems(supabase, 'wrong_book', user.id);
 
   if (error) {
     console.error('Error fetching wrong book:', error);
@@ -32,10 +28,15 @@ export default async function WrongBookPage() {
     );
   }
 
+  if (partialError) {
+    // Legacy cards still render; only the practice-linked half failed.
+    console.error('Error fetching practice-linked wrong book entries:', partialError);
+  }
+
   return (
     <div className="min-h-[100dvh] bg-canvas">
       <AppQuickNav />
-      <WrongBookView initialQuestions={questions} userId={user.id} />
+      <WrongBookView initialItems={items} degraded={Boolean(partialError)} />
     </div>
   );
 }

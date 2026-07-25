@@ -13,6 +13,7 @@ import {
 } from '@phosphor-icons/react';
 import { buildPracticeReviewReport, type PracticeReviewTone } from '@/lib/practice-session-report';
 import type { PracticeQuestion } from '@/lib/types';
+import WrongBookSync from './WrongBookSync';
 
 function queueToneClass(tone: PracticeReviewTone) {
   return {
@@ -64,8 +65,8 @@ export default function ResultInspector({
   const headline = showResults ? 'Local attempt complete' : '只读预览模式';
   const summary = showResults
     ? manualOnly
-      ? `当前有 ${score.manualReview}/${score.total} 份回应进入本地待反馈状态。这里不会写入 history、错题本或 Supabase。`
-      : `当前本地命中 ${score.correct}/${score.objectiveTotal} 道客观题，accuracy ${score.accuracy}%。这里不会写入 history、错题本或 Supabase。`
+      ? `当前有 ${score.manualReview}/${score.total} 份回应进入本地待反馈状态。成绩存在本机，可以选择存入错题本。`
+      : `当前本地命中 ${score.correct}/${score.objectiveTotal} 道客观题，accuracy ${score.accuracy}%。成绩存在本机，可以选择存入错题本。`
     : '完成本地检查后，这里会生成本机 Review Report 和复盘队列。';
 
   return (
@@ -235,6 +236,8 @@ export default function ResultInspector({
               没有需要优先复盘的题。可以返回 Library，或编辑答案后重新检查。
             </div>
           )}
+
+          {showResults && <WrongBookSync queue={queue} />}
         </div>
       )}
     </div>
