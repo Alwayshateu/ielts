@@ -39,6 +39,7 @@ import { practiceAttemptDetailHref, PRACTICE_SESSIONS_HREF } from '@/lib/practic
 import { formatClock } from '@/lib/practice-clock';
 import type { PracticeSkill } from '@/lib/types';
 import { riseChild, springSnap, staggerParent } from '../ui/motion-presets';
+import { dayKey, formatDayLabel, formatDuration, formatTime } from './history-format';
 
 const SKILL_TONES: Record<PracticeSkill, { Icon: typeof BookOpenText; label: string; badge: string; bar: string }> = {
   foundation: { Icon: Target, label: 'Foundation', badge: 'bg-zinc-100 text-ink-muted', bar: 'bg-zinc-400' },
@@ -47,28 +48,6 @@ const SKILL_TONES: Record<PracticeSkill, { Icon: typeof BookOpenText; label: str
   writing: { Icon: PenNib, label: 'Writing', badge: 'bg-amber-50 text-amber-700', bar: 'bg-amber-500' },
   speaking: { Icon: Microphone, label: 'Speaking', badge: 'bg-rose-50 text-rose-700', bar: 'bg-rose-500' },
 };
-
-function formatDuration(seconds: number) {
-  if (seconds <= 0) return '0 分钟';
-  const totalMinutes = Math.round(seconds / 60);
-  if (totalMinutes < 60) return `${totalMinutes} 分钟`;
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  return minutes ? `${hours} 小时 ${minutes} 分` : `${hours} 小时`;
-}
-
-function formatDayLabel(ts: number) {
-  return new Date(ts).toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'short' });
-}
-
-function formatTime(ts: number) {
-  return new Date(ts).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-}
-
-function dayKey(ts: number) {
-  const date = new Date(ts);
-  return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
-}
 
 type SyncState =
   | { status: 'idle' }
