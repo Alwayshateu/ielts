@@ -5,6 +5,7 @@ import { getPracticeAcceptedAnswers, getPracticeAnswerState } from '@/lib/practi
 import { analyzeWritingResponse, type WritingFeedbackStatus } from '@/lib/practice-writing-feedback';
 import type { PracticeQuestion } from '@/lib/types';
 import { useFavoriteQuestions } from './useFavoriteQuestions';
+import { countWords, getSpeakingChecklist, isExtendedResponse, labelQuestionType, optionMarker } from './answer-sheet-helpers';
 
 const MISTAKE_REASONS = [
   { id: 'location', label: '定位错误' },
@@ -27,39 +28,6 @@ const SPEAKING_RUBRIC = [
   { id: 'grammar', label: 'Grammar' },
   { id: 'pronunciation', label: 'Pronunciation' },
 ];
-
-function optionMarker(index: number) {
-  return String.fromCharCode(65 + index);
-}
-
-function labelQuestionType(type: PracticeQuestion['question_type']) {
-  const labels: Record<PracticeQuestion['question_type'], string> = {
-    multiple_choice: 'Multiple Choice',
-    true_false_not_given: 'True / False / Not Given',
-    sentence_completion: 'Sentence Completion',
-    short_answer: 'Short Answer',
-    writing_task: 'Writing Task',
-    speaking_response: 'Speaking Response',
-  };
-
-  return labels[type] ?? type;
-}
-
-function isExtendedResponse(question: PracticeQuestion) {
-  return question.question_type === 'writing_task' || question.question_type === 'speaking_response';
-}
-
-function countWords(value: string) {
-  return value.trim().split(/\s+/).filter(Boolean).length;
-}
-
-function getSpeakingChecklist(answer: string) {
-  return [
-    { label: 'What / when / who covered', done: /\b(what|when|who|because|benefit|improve|changed?)\b/i.test(answer) || countWords(answer) >= 30 },
-    { label: 'Reason or example included', done: /\b(for example|because|for instance|as a result|so that)\b/i.test(answer) },
-    { label: 'Self-review note present', done: /\b(fluency|pronunciation|grammar|vocabulary|improve|next time)\b/i.test(answer) },
-  ];
-}
 
 const WRITING_STATUS_TONES: Record<WritingFeedbackStatus, { chip: string; bar: string }> = {
   empty: { chip: 'bg-white text-amber-800/80', bar: 'bg-amber-300' },
