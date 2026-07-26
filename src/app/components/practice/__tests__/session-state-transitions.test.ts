@@ -6,6 +6,7 @@ import {
   removeAnnotation,
   setReviewNote,
   setRubricRating,
+  shouldRecordAttempt,
   toggleFlag,
   toggleMistakeReason,
   updateAnnotation,
@@ -160,5 +161,24 @@ describe('pickReviewTarget', () => {
 
   it('returns null when nothing is unanswered or flagged', () => {
     expect(pickReviewTarget([], questions, [])).toBeNull();
+  });
+});
+
+describe('shouldRecordAttempt', () => {
+  it('records on a genuine false to true reveal', () => {
+    expect(shouldRecordAttempt(false, true)).toBe(true);
+  });
+
+  it('does not record on the hydration pass (null previous value)', () => {
+    expect(shouldRecordAttempt(null, true)).toBe(false);
+    expect(shouldRecordAttempt(null, false)).toBe(false);
+  });
+
+  it('does not re-record a resumed draft whose results were already revealed', () => {
+    expect(shouldRecordAttempt(true, true)).toBe(false);
+  });
+
+  it('does not record while results stay hidden', () => {
+    expect(shouldRecordAttempt(false, false)).toBe(false);
   });
 });

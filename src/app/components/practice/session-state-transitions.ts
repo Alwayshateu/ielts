@@ -114,3 +114,10 @@ export function pickReviewTarget(
   const next = unansweredQuestions[0] ?? questions.find((question) => flaggedQuestionIds.includes(question.id));
   return next?.id ?? null;
 }
+
+// Attempt recording: a showResults change records a NEW history entry only on a genuine false→true
+// reveal. The null previous value is the hydration pass (baseline capture) and true→true is a resumed
+// draft whose results were already revealed — neither should re-record, so both return false.
+export function shouldRecordAttempt(previousShowResults: boolean | null, showResults: boolean): boolean {
+  return previousShowResults === false && showResults;
+}

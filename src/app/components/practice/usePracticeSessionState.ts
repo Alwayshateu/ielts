@@ -23,6 +23,7 @@ import {
   removeAnnotation,
   setReviewNote,
   setRubricRating,
+  shouldRecordAttempt,
   toggleFlag,
   toggleMistakeReason,
   updateAnnotation,
@@ -126,7 +127,7 @@ export function usePracticeSessionState(unit: PracticeUnit) {
       return;
     }
 
-    if (prevShowResultsRef.current === false && showResults) {
+    if (shouldRecordAttempt(prevShowResultsRef.current, showResults)) {
       const report = buildPracticeReviewReport({
         questions: unit.questions,
         answers,
