@@ -37,6 +37,7 @@ import {
 } from '@/lib/practice-session-recommendations';
 import { getSamplePracticeUnits } from '@/lib/practice-session-samples';
 import { riseChild, springSnap, staggerParent } from './ui/motion-presets';
+import { formatLastPracticed } from './dashboard-format';
 
 type Difficulty = 'easy' | 'medium' | 'hard';
 type IconType = ComponentType<{ size?: number; weight?: 'regular' | 'bold' | 'duotone' | 'fill' }>;
@@ -167,20 +168,6 @@ const DIFFICULTY_TONE: Record<
 interface Profile {
   username: string | null;
   email: string | null;
-}
-
-function formatLastPracticed(value: string | null) {
-  if (!value) return '还没有记录';
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '最近练过';
-
-  return new Intl.DateTimeFormat('zh-CN', {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date);
 }
 
 export default function DashboardContent({
