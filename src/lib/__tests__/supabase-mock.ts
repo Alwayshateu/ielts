@@ -15,7 +15,7 @@ export type MockResult = { data?: unknown; error?: unknown; count?: number | nul
 
 export type QueryContext = {
   table: string;
-  op: 'select' | 'insert' | 'update' | 'delete';
+  op: 'select' | 'insert' | 'update' | 'delete' | 'upsert';
   isCount: boolean;
   args: Record<string, unknown>;
   payload?: unknown;
@@ -23,10 +23,18 @@ export type QueryContext = {
 
 export type Resolver = (ctx: QueryContext) => MockResult;
 
+export type MockAuthOptions = {
+  /** User returned by `auth.getUser()`; null (default) means "not signed in". */
+  authUser?: unknown;
+  /** Error returned by `auth.getUser()`. */
+  authError?: unknown;
+};
+
 interface Builder extends PromiseLike<MockResult> {
   select(cols?: string, opts?: { count?: string; head?: boolean }): Builder;
   insert(payload?: unknown): Builder;
   update(payload?: unknown): Builder;
+  upsert(payload?: unknown, opts?: { onConflict?: string }): Builder;
   delete(): Builder;
   eq(...a: unknown[]): Builder;
   neq(...a: unknown[]): Builder;
@@ -43,12 +51,15 @@ interface Builder extends PromiseLike<MockResult> {
   single(): Promise<MockResult>;
 }
 
-export function createSupabaseMock(resolve: Resolver) {
+export function createSupabaseMock(resolve: Resolver, options: MockAuthOptions = {}) {
   const calls: QueryContext[] = [];
 
   function from(table: string): Builder {
     const ctx: QueryContext = { table, op: 'select', isCount: false, args: {} };
     let settled = false;
+    // Once a mutation verb runs, a trailing `.select()` (e.g. `.upsert(...).select('id')`)
+    // must not reset op back to 'select' — resolvers key on the mutation op.
+    let mutated = false;
 
     const run = (): MockResult => {
       if (!settled) {
@@ -67,7 +78,7 @@ export function createSupabaseMock(resolve: Resolver) {
 
     const builder: Builder = {
       select(cols, opts) {
-        ctx.op = 'select';
+        if (!mutated) ctx.op = 'select';
         ctx.args.select = cols;
         if (opts?.head || opts?.count) ctx.isCount = true;
         return builder;
@@ -75,15 +86,25 @@ export function createSupabaseMock(resolve: Resolver) {
       insert(payload) {
         ctx.op = 'insert';
         ctx.payload = payload;
+        mutated = true;
         return builder;
       },
       update(payload) {
         ctx.op = 'update';
         ctx.payload = payload;
+        mutated = true;
+        return builder;
+      },
+      upsert(payload, opts) {
+        ctx.op = 'upsert';
+        ctx.payload = payload;
+        if (opts?.onConflict) ctx.args.onConflict = opts.onConflict;
+        mutated = true;
         return builder;
       },
       delete() {
         ctx.op = 'delete';
+        mutated = true;
         return builder;
       },
       eq: record('eq'),
@@ -105,6 +126,13 @@ export function createSupabaseMock(resolve: Resolver) {
     return builder;
   }
 
-  const client = { from } as unknown as SupabaseClient;
+  const auth = {
+    getUser: async () => ({
+      data: { user: options.authUser ?? null },
+      error: options.authError ?? null,
+    }),
+  };
+
+  const client = { from, auth } as unknown as SupabaseClient;
   return { client, calls };
 }
