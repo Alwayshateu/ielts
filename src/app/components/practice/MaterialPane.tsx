@@ -7,6 +7,7 @@ import { formatDifficulty } from '@/lib/question-labels';
 import { parseTranscriptCues } from '@/lib/practice-listening-cues';
 import { BookOpenText, Clock, FileText } from '@phosphor-icons/react';
 import { annotationSyncCopy, formatMetadataSeconds, formatMetadataValue, formatMinutes, getMaterialText } from './material-pane/format';
+import { getUnitAssetUrl } from './material-pane/media';
 import { getSelectionInParagraph, hasOverlap, type PendingSelection } from './material-pane/selection';
 import { getMaterialMeta } from './material-pane/material-meta';
 import { AnnotatedParagraph } from './material-pane/AnnotatedParagraph';
@@ -34,6 +35,7 @@ export default function MaterialPane({
   annotationSync?: { enabled: boolean; status: AnnotationSyncStatus; restoredCount: number };
 }) {
   const materialText = getMaterialText(unit);
+  const assetUrl = getUnitAssetUrl(unit);
   const paragraphs = useMemo(() => materialText.split('\n\n').filter(Boolean), [materialText]);
   const transcriptCues = useMemo(() => parseTranscriptCues(unit.metadata?.transcriptCues), [unit.metadata?.transcriptCues]);
   const materialMeta = getMaterialMeta(unit);
@@ -292,6 +294,15 @@ export default function MaterialPane({
               />
               <SpeakingRecorder />
             </>
+          )}
+
+          {assetUrl && (
+            <figure className="mb-5 overflow-hidden rounded-[1.5rem] border border-line bg-white">
+              {/* Signed Storage URLs are external and time-limited, so the next/image optimizer is a poor fit — render directly. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={assetUrl} alt={`${unit.title} 参考图`} className="w-full object-contain" />
+              <figcaption className="border-t border-line px-4 py-2 text-xs text-ink-subtle">参考图 · 仅供练习使用</figcaption>
+            </figure>
           )}
 
           <div

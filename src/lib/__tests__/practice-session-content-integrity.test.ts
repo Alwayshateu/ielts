@@ -74,4 +74,21 @@ describe('practice session content integrity', () => {
       expect(question.answer_key.answers, `${question.id} should be keyless`).toEqual([]);
     });
   });
+
+  it('keeps reference-image URLs well-formed when a unit or question declares one', () => {
+    units.forEach((unit) => {
+      if (unit.asset_url !== null) {
+        expect(typeof unit.asset_url, `${unit.id} asset_url type`).toBe('string');
+        expect(unit.asset_url.trim().length, `${unit.id} asset_url must be non-empty`).toBeGreaterThan(0);
+      }
+    });
+
+    allQuestions.forEach((question) => {
+      const assetUrl = question.metadata?.assetUrl;
+      if (assetUrl !== undefined) {
+        expect(typeof assetUrl, `${question.id} metadata.assetUrl type`).toBe('string');
+        expect(String(assetUrl).trim().length, `${question.id} metadata.assetUrl must be non-empty`).toBeGreaterThan(0);
+      }
+    });
+  });
 });
