@@ -38,6 +38,7 @@ import { formatDifficulty } from '@/lib/question-labels';
 import { formatClock } from '@/lib/practice-clock';
 import type { PracticeQuestionType, PracticeSkill } from '@/lib/types';
 import { riseChild, springSnap, staggerParent } from '../ui/motion-presets';
+import { deltaTone, formatSignedPercent, formatSignedSeconds } from './attempt-delta';
 
 const SKILL_TONES: Record<PracticeSkill, { Icon: typeof BookOpenText; label: string; badge: string }> = {
   foundation: { Icon: Target, label: 'Foundation', badge: 'bg-zinc-100 text-ink-muted' },
@@ -100,15 +101,6 @@ function formatStamp(ts: number) {
     hour: '2-digit',
     minute: '2-digit',
   });
-}
-
-function formatSignedPercent(delta: number) {
-  return `${delta > 0 ? '+' : delta < 0 ? '−' : '±'}${Math.abs(delta)}%`;
-}
-
-function formatSignedSeconds(delta: number) {
-  const sign = delta > 0 ? '+' : delta < 0 ? '−' : '±';
-  return `${sign}${formatClock(Math.abs(delta))}`;
 }
 
 export default function PracticeAttemptDetailView({ attemptId }: { attemptId: string }) {
@@ -302,11 +294,6 @@ function AttemptDetail({
       </motion.div>
     </main>
   );
-}
-
-function deltaTone(delta: number | null) {
-  if (delta === null || delta === 0) return undefined;
-  return delta > 0 ? 'text-emerald-600' : 'text-rose-600';
 }
 
 function deltaIcon(delta: number | null) {
