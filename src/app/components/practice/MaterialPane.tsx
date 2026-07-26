@@ -18,12 +18,10 @@ import {
   FastForward,
   FileText,
   Gauge,
-  Headphones,
   LockSimple,
   Microphone,
   MicrophoneSlash,
   Pause,
-  PenNib,
   Play,
   Record,
   Rewind,
@@ -33,167 +31,9 @@ import {
   WarningCircle,
   Waveform,
 } from '@phosphor-icons/react';
-
-function formatMinutes(seconds: number | null) {
-  if (!seconds) return '不限时';
-  return `${Math.round(seconds / 60)} 分钟`;
-}
-
-type PendingSelection = {
-  paragraphIndex: number;
-  startOffset: number;
-  endOffset: number;
-  text: string;
-  x: number;
-  y: number;
-};
-
-function getParagraphElement(node: Node | null) {
-  const element = node instanceof Element ? node : node?.parentElement;
-  return element?.closest<HTMLElement>('[data-passage-paragraph]') ?? null;
-}
-
-function getTextOffset(container: HTMLElement, targetNode: Node, targetOffset: number) {
-  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
-  let offset = 0;
-  let current = walker.nextNode();
-
-  while (current) {
-    if (current === targetNode) {
-      return offset + targetOffset;
-    }
-
-    offset += current.textContent?.length ?? 0;
-    current = walker.nextNode();
-  }
-
-  return offset;
-}
-
-function getSelectionInParagraph() {
-  const selection = window.getSelection();
-  if (!selection || selection.isCollapsed || selection.rangeCount === 0) return null;
-
-  const range = selection.getRangeAt(0);
-  const startParagraph = getParagraphElement(range.startContainer);
-  const endParagraph = getParagraphElement(range.endContainer);
-
-  if (!startParagraph || !endParagraph || startParagraph !== endParagraph) return null;
-
-  const paragraphIndex = Number(startParagraph.dataset.passageParagraph);
-  if (Number.isNaN(paragraphIndex)) return null;
-
-  const rawStart = getTextOffset(startParagraph, range.startContainer, range.startOffset);
-  const rawEnd = getTextOffset(startParagraph, range.endContainer, range.endOffset);
-  const startOffset = Math.min(rawStart, rawEnd);
-  const endOffset = Math.max(rawStart, rawEnd);
-  const text = startParagraph.textContent?.slice(startOffset, endOffset).trim() ?? '';
-
-  if (!text) return null;
-
-  return {
-    paragraphIndex,
-    startOffset,
-    endOffset,
-    text,
-  };
-}
-
-function formatMetadataSeconds(value: unknown) {
-  if (typeof value !== 'number') return '未设置';
-  if (value < 60) return `${value} 秒`;
-  return `${Math.round(value / 60)} 分钟`;
-}
-
-function formatTimer(seconds: number) {
-  const safeSeconds = Math.max(0, seconds);
-  const minutes = Math.floor(safeSeconds / 60);
-  const remainingSeconds = safeSeconds % 60;
-
-  return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
-}
-
-function formatMetadataValue(value: unknown, fallback = '未设置') {
-  if (typeof value === 'number') return String(value);
-  if (typeof value === 'string' && value.trim()) return value;
-  return fallback;
-}
-
-
-function hasOverlap(annotations: PassageAnnotation[], next: Pick<PassageAnnotation, 'paragraphIndex' | 'startOffset' | 'endOffset'>) {
-  return annotations.some(
-    (annotation) =>
-      annotation.paragraphIndex === next.paragraphIndex &&
-      Math.max(annotation.startOffset, next.startOffset) < Math.min(annotation.endOffset, next.endOffset)
-  );
-}
-
-function getMaterialText(unit: PracticeUnit) {
-  return unit.passage_text ?? unit.transcript ?? String(unit.metadata?.prompt ?? unit.metadata?.cueCard ?? '');
-}
-
-function getMaterialMeta(unit: PracticeUnit) {
-  if (unit.material_type === 'audio') {
-    return {
-      Icon: Headphones,
-      label: 'Listening Section',
-      hintTarget: 'Transcript',
-      annotationTitle: 'Transcript 标注',
-      emptyLabel: 'Audio placeholder',
-      emptyDescription: '正式 Listening MVP 会接入 audio_url、播放进度和 transcript 同步。当前先用 transcript 预览“一段音频 + 多题组”的界面结构。',
-      tone: 'sky',
-    };
-  }
-
-  if (unit.material_type === 'writing_prompt') {
-    return {
-      Icon: PenNib,
-      label: 'Writing Task',
-      hintTarget: 'Prompt',
-      annotationTitle: 'Prompt 标注',
-      emptyLabel: 'Writing workspace preview',
-      emptyDescription: '正式 Writing MVP 会接入字数目标、rubric、自评和反馈记录。当前先用本地草稿预览 Task response 流程。',
-      tone: 'amber',
-    };
-  }
-
-  if (unit.material_type === 'speaking_prompt') {
-    return {
-      Icon: Microphone,
-      label: 'Speaking Session',
-      hintTarget: 'Cue card',
-      annotationTitle: 'Cue card 标注',
-      emptyLabel: 'Speaking rehearsal preview',
-      emptyDescription: '正式 Speaking MVP 会接入准备计时、录音、转写和反馈。当前先用文字要点预览 Part 2 回答流程。',
-      tone: 'rose',
-    };
-  }
-
-  return {
-    Icon: BookOpenText,
-    label: 'Reading Passage',
-    hintTarget: 'Passage',
-    annotationTitle: 'Passage 标注',
-    emptyLabel: null,
-    emptyDescription: null,
-    tone: 'emerald',
-  };
-}
-
-function annotationSyncCopy(sync: { status: AnnotationSyncStatus; restoredCount: number }): string {
-  switch (sync.status) {
-    case 'syncing':
-      return '，正在同步到云端…';
-    case 'error':
-      return '，本机已保存，云端同步暂时失败，改动后会自动重试。';
-    case 'synced':
-      return sync.restoredCount > 0
-        ? `，已与云端同步（含 ${sync.restoredCount} 条从云端恢复），换设备也能看到。`
-        : '，已同步到云端，换设备也能看到。';
-    default:
-      return '，本机已保存，改动后会同步到云端。';
-  }
-}
+import { annotationSyncCopy, formatMetadataSeconds, formatMetadataValue, formatMinutes, formatTimer, getMaterialText } from './material-pane/format';
+import { getSelectionInParagraph, hasOverlap, type PendingSelection } from './material-pane/selection';
+import { getMaterialMeta } from './material-pane/material-meta';
 
 export default function MaterialPane({
   unit,
