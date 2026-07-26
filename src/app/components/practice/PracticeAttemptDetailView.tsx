@@ -35,6 +35,7 @@ import {
 } from '@/lib/practice-session-history';
 import { PRACTICE_HISTORY_HREF, PRACTICE_SESSIONS_HREF } from '@/lib/practice-session-links';
 import { formatDifficulty } from '@/lib/question-labels';
+import { formatClock } from '@/lib/practice-clock';
 import type { PracticeQuestionType, PracticeSkill } from '@/lib/types';
 import { riseChild, springSnap, staggerParent } from '../ui/motion-presets';
 
@@ -90,11 +91,6 @@ const QUESTION_TYPE_LABELS: Record<PracticeQuestionType, string> = {
 };
 
 type OutcomeFilter = 'all' | PracticeAttemptOutcome;
-
-function formatClock(seconds: number) {
-  const safe = Math.max(0, seconds);
-  return `${String(Math.floor(safe / 60)).padStart(2, '0')}:${String(safe % 60).padStart(2, '0')}`;
-}
 
 function formatStamp(ts: number) {
   return new Date(ts).toLocaleString('zh-CN', {

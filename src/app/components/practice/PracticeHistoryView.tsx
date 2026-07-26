@@ -36,6 +36,7 @@ import {
 } from '@/lib/practice-session-history';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
 import { practiceAttemptDetailHref, PRACTICE_SESSIONS_HREF } from '@/lib/practice-session-links';
+import { formatClock } from '@/lib/practice-clock';
 import type { PracticeSkill } from '@/lib/types';
 import { riseChild, springSnap, staggerParent } from '../ui/motion-presets';
 
@@ -54,13 +55,6 @@ function formatDuration(seconds: number) {
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
   return minutes ? `${hours} 小时 ${minutes} 分` : `${hours} 小时`;
-}
-
-function formatClock(seconds: number) {
-  const safe = Math.max(0, seconds);
-  const minutes = Math.floor(safe / 60);
-  const rest = safe % 60;
-  return `${String(minutes).padStart(2, '0')}:${String(rest).padStart(2, '0')}`;
 }
 
 function formatDayLabel(ts: number) {

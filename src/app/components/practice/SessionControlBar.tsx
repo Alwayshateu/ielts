@@ -15,6 +15,7 @@ import {
   XCircle,
 } from '@phosphor-icons/react';
 import type { PracticeUnit } from '@/lib/types';
+import { formatClock } from '@/lib/practice-clock';
 import { springSnap } from '../ui/motion-presets';
 
 type SessionScore = {
@@ -25,14 +26,6 @@ type SessionScore = {
   manualReview?: number;
   objectiveTotal?: number;
 };
-
-function formatClock(seconds: number) {
-  const safeSeconds = Math.max(0, seconds);
-  const minutes = Math.floor(safeSeconds / 60);
-  const remainingSeconds = safeSeconds % 60;
-
-  return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
-}
 
 export default function SessionControlBar({
   unit,
