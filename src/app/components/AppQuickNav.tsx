@@ -15,6 +15,7 @@ import {
 import { readPracticeSessionDraftStatuses } from '@/lib/practice-session-draft';
 import { getPracticeLearningSummary } from '@/lib/practice-session-recommendations';
 import { getSamplePracticeUnits } from '@/lib/practice-session-samples';
+import { sessionBadgeClass, sessionNavStatusFromSummary } from './nav-status';
 
 const NAV_ITEMS = [
   { href: '/dashboard', label: 'Dashboard', Icon: Gauge, match: (path: string) => path === '/dashboard' },
@@ -39,29 +40,7 @@ const NAV_ITEMS = [
 function getSessionNavStatus() {
   const units = getSamplePracticeUnits();
   const statuses = readPracticeSessionDraftStatuses(units);
-  const summary = getPracticeLearningSummary(statuses);
-
-  if (summary.needsReview > 0) {
-    return { label: `${summary.needsReview} 复盘`, tone: 'sky' as const };
-  }
-  if (summary.inProgress > 0) {
-    return { label: `${summary.inProgress} 草稿`, tone: 'amber' as const };
-  }
-  if (summary.checked > 0) {
-    return { label: `${summary.checked} 已查`, tone: 'emerald' as const };
-  }
-
-  return null;
-}
-
-function sessionBadgeClass(tone: 'sky' | 'amber' | 'emerald', active: boolean) {
-  if (active) return 'border-white/60 bg-white/70 text-accent';
-
-  return {
-    sky: 'border-sky-200 bg-sky-50 text-sky-700',
-    amber: 'border-amber-200 bg-amber-50 text-amber-700',
-    emerald: 'border-emerald-200 bg-emerald-50 text-emerald-700',
-  }[tone];
+  return sessionNavStatusFromSummary(getPracticeLearningSummary(statuses));
 }
 
 export default function AppQuickNav() {
