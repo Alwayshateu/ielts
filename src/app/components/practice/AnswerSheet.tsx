@@ -1,9 +1,10 @@
 'use client';
 
-import { Flag, NotePencil } from '@phosphor-icons/react';
+import { Flag, Heart, NotePencil } from '@phosphor-icons/react';
 import { getPracticeAcceptedAnswers, getPracticeAnswerState } from '@/lib/practice-answer-check';
 import { analyzeWritingResponse, type WritingFeedbackStatus } from '@/lib/practice-writing-feedback';
 import type { PracticeQuestion } from '@/lib/types';
+import { useFavoriteQuestions } from './useFavoriteQuestions';
 
 const MISTAKE_REASONS = [
   { id: 'location', label: '定位错误' },
@@ -274,6 +275,8 @@ export default function AnswerSheet({
   onToggleMistakeReason: (questionId: string, reason: string) => void;
   onRubricRating: (questionId: string, criterion: string, rating: number) => void;
 }) {
+  const favorites = useFavoriteQuestions(questions);
+
   return (
     <div className="space-y-4">
       {questions.map((question) => {
@@ -329,6 +332,22 @@ export default function AnswerSheet({
                     <Flag size={13} weight={flagged ? 'fill' : 'regular'} />
                     {flagged ? '已标记' : '稍后回看'}
                   </button>
+                  {favorites.ready && favorites.canSave(question.id) && (
+                    <button
+                      type="button"
+                      onClick={() => void favorites.toggleFavorite(question.id)}
+                      disabled={favorites.pendingId === question.id}
+                      aria-pressed={favorites.savedIds.has(question.id)}
+                      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition-all active:scale-[0.98] disabled:opacity-60 ${
+                        favorites.savedIds.has(question.id)
+                          ? 'border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100'
+                          : 'border-line bg-surface text-ink-subtle hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600'
+                      }`}
+                    >
+                      <Heart size={13} weight={favorites.savedIds.has(question.id) ? 'fill' : 'regular'} />
+                      {favorites.savedIds.has(question.id) ? '已收藏' : '收藏'}
+                    </button>
+                  )}
                 </div>
                 <span className="rounded-full border border-line bg-surface px-3 py-1 text-xs font-medium text-ink-subtle">
                   {labelQuestionType(question.question_type)}

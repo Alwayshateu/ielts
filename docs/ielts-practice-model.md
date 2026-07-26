@@ -882,9 +882,23 @@ src/lib/question-collections.ts   -- 双源读取、写入、幂等保存
 src/lib/dashboard-recommendation.ts -- 把两路信号收敛成一个「下一步做什么」
 ```
 
-开关：`NEXT_PUBLIC_PRACTICE_COLLECTION_LINK=on`。关闭时（migration 未应用）错题本和收藏
-只读 legacy 部分，功能不受影响。practice 那半边读取失败也只是降级 —— legacy 卡片照常渲染，
-页面上给一条提示，不会整页报错。
+开关：`NEXT_PUBLIC_PRACTICE_COLLECTION_LINK=on`（migration 0003 已于 2026-07-26 应用，
+开关已打开）。关闭时错题本和收藏只读 legacy 部分，功能不受影响。practice 那半边读取失败
+也只是降级 —— legacy 卡片照常渲染，页面上给一条提示，不会整页报错。
+
+两个实现要点（都被 live 测试钉住）：
+- **id 解析**：本地样题的 question id 是 `green-roofs-q1` 这类 slug，而
+  `practice_question_id` 列是指向 `practice_questions(id)` 的 uuid 外键。所有写入前先经
+  `resolvePracticeQuestionDbIds()` 通过 `external_key` 反查 uuid；uuid 形态的 id
+  （supabase 读源）原样通过。
+- **幂等写入**：`(user_id, practice_question_id)` 的唯一索引是**部分索引**（带
+  `where practice_question_id is not null`），Postgres 的 `ON CONFLICT` 无法经 PostgREST
+  推断部分索引，所以保存用普通 insert 并把 23505 视为「已保存」，而不是 upsert。
+
+Session 内的收藏入口：AnswerSheet 每道题的题头有「收藏」按钮
+（`useFavoriteQuestions` hook —— 挂载时一次批量解析 + 读取已收藏状态，点按乐观更新、
+失败回滚）。错题入口：检查答案后 Review Queue 下方的「存入错题本」
+（`WrongBookSync`，只收录客观题错/漏，人工评分的题不算）。
 
 Dashboard 之前有两套互相矛盾的展示：legacy 统计卡显示「0 次练习」的同时，紧挨着的 Session
 卡显示真实的连续天数；两张推荐卡各自独立计算，可能给出冲突建议。现在推荐收敛为一张

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArrowRight, CheckCircle, ClipboardText, WarningCircle } from '@phosphor-icons/react';
 import {
   isPracticeCollectionLinkEnabled,
+  resolvePracticeQuestionDbIds,
   savePracticeQuestionToCollection,
 } from '@/lib/question-collections';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
@@ -47,23 +48,40 @@ export default function WrongBookSync({ queue }: { queue: PracticeReviewQueueIte
       return;
     }
 
+    // Local question ids are authored slugs; the DB column wants practice_questions
+    // row uuids, so resolve through external_key first.
+    const dbIdByLocalId = await resolvePracticeQuestionDbIds(
+      supabase,
+      missed.map((item) => item.question.id)
+    );
+
     let saved = 0;
+    let unresolved = 0;
     const failures: string[] = [];
 
     for (const item of missed) {
+      const practiceQuestionId = dbIdByLocalId.get(item.question.id);
+      if (!practiceQuestionId) {
+        unresolved += 1;
+        continue;
+      }
+
       const error = await savePracticeQuestionToCollection({
         supabase,
         table: 'wrong_book',
         userId: user.id,
-        practiceQuestionId: item.question.id,
+        practiceQuestionId,
       });
 
       if (error) failures.push(error.message);
       else saved += 1;
     }
 
-    if (failures.length > 0 && saved === 0) {
-      setState({ status: 'error', message: failures[0] });
+    if (saved === 0 && (failures.length > 0 || unresolved > 0)) {
+      setState({
+        status: 'error',
+        message: failures[0] ?? '这些题目还没同步到云端题库，暂时无法保存。',
+      });
       return;
     }
 

@@ -152,8 +152,9 @@ export async function removeCollectionItem(
 /**
  * Record a practice-session question in the wrong book or favorites.
  *
- * Idempotent per (user, practice question) via the partial unique indexes from
- * migration 0003 — a duplicate save is ignored rather than erroring.
+ * Idempotent per (user, practice question): the partial unique index from migration 0003
+ * rejects duplicates, and a 23505 is treated as "already saved". A plain insert is used
+ * because ON CONFLICT cannot infer a partial unique index through PostgREST.
  */
 export async function savePracticeQuestionToCollection({
   supabase,
@@ -166,12 +167,12 @@ export async function savePracticeQuestionToCollection({
   userId: string;
   practiceQuestionId: string;
 }) {
-  const { error } = await supabase.from(table).upsert(
-    { user_id: userId, practice_question_id: practiceQuestionId, question_id: null },
-    { onConflict: 'user_id,practice_question_id', ignoreDuplicates: true }
-  );
+  const { error } = await supabase
+    .from(table)
+    .insert({ user_id: userId, practice_question_id: practiceQuestionId, question_id: null });
 
-  return error ? new Error(error.message) : null;
+  if (!error || error.code === '23505') return null;
+  return new Error(error.message);
 }
 
 /** Remove a practice question from a collection, addressed by question rather than row. */
@@ -193,6 +194,46 @@ export async function removePracticeQuestionFromCollection({
     .eq('practice_question_id', practiceQuestionId);
 
   return error ? new Error(error.message) : null;
+}
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+/**
+ * Resolve frontend question ids to practice_questions row uuids.
+ *
+ * With PRACTICE_UNITS_SOURCE=local, question ids are authored slugs like
+ * 'green-roofs-q1' — those live in the DB as external_key, not id. With the supabase
+ * source they already are row uuids. Ids with no DB row are simply absent from the
+ * returned map; callers treat those as "cannot save".
+ */
+export async function resolvePracticeQuestionDbIds(
+  supabase: SupabaseClient,
+  questionIds: string[]
+): Promise<Map<string, string>> {
+  const map = new Map<string, string>();
+  const externals: string[] = [];
+
+  for (const id of questionIds) {
+    if (UUID_PATTERN.test(id)) map.set(id, id);
+    else if (id) externals.push(id);
+  }
+
+  if (externals.length > 0) {
+    const { data, error } = await supabase
+      .from('practice_questions')
+      .select('id, external_key')
+      .in('external_key', externals);
+
+    if (!error) {
+      for (const row of data ?? []) {
+        if (typeof row.external_key === 'string' && typeof row.id === 'string') {
+          map.set(row.external_key, row.id);
+        }
+      }
+    }
+  }
+
+  return map;
 }
 
 /** Which of the given practice questions the user has already saved. */
