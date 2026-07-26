@@ -48,3 +48,6 @@ next-env.d.ts
 
 # internal progress reports — served publicly from /public, keep out of the build
 public/reports/
+
+# raw Cambridge IELTS source PDFs (copyrighted — do not commit) and their extracted intermediates
+/raw/
