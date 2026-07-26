@@ -17,6 +17,16 @@ import {
 import { buildPracticeReviewReport } from '@/lib/practice-session-report';
 import { getExamDurationSeconds } from '@/lib/practice-session-timing';
 import type { PassageAnnotation, PracticeUnit } from '@/lib/types';
+import {
+  addAnnotation,
+  pickReviewTarget,
+  removeAnnotation,
+  setReviewNote,
+  setRubricRating,
+  toggleFlag,
+  toggleMistakeReason,
+  updateAnnotation,
+} from './session-state-transitions';
 
 export function usePracticeSessionState(unit: PracticeUnit) {
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -166,59 +176,26 @@ export function usePracticeSessionState(unit: PracticeUnit) {
   };
 
   const handleToggleFlag = (questionId: string) => {
-    setFlaggedQuestionIds((current) =>
-      current.includes(questionId)
-        ? current.filter((id) => id !== questionId)
-        : [...current, questionId]
-    );
+    setFlaggedQuestionIds((current) => toggleFlag(current, questionId));
     setActiveQuestionId(questionId);
   };
 
   const handleReviewNote = (questionId: string, note: string) => {
-    setReviewNotesByQuestionId((current) => {
-      const trimmed = note.trimStart();
-      if (!trimmed) {
-        const next = { ...current };
-        delete next[questionId];
-        return next;
-      }
-
-      return { ...current, [questionId]: trimmed };
-    });
+    setReviewNotesByQuestionId((current) => setReviewNote(current, questionId, note));
   };
 
   const handleToggleMistakeReason = (questionId: string, reason: string) => {
-    setMistakeReasonsByQuestionId((current) => {
-      const reasons = current[questionId] ?? [];
-      const nextReasons = reasons.includes(reason)
-        ? reasons.filter((item) => item !== reason)
-        : [...reasons, reason];
-      const next = { ...current };
-
-      if (nextReasons.length === 0) {
-        delete next[questionId];
-      } else {
-        next[questionId] = nextReasons;
-      }
-
-      return next;
-    });
+    setMistakeReasonsByQuestionId((current) => toggleMistakeReason(current, questionId, reason));
   };
 
   const handleRubricRating = (questionId: string, criterion: string, rating: number) => {
-    setRubricRatingsByQuestionId((current) => ({
-      ...current,
-      [questionId]: {
-        ...(current[questionId] ?? {}),
-        [criterion]: rating,
-      },
-    }));
+    setRubricRatingsByQuestionId((current) => setRubricRating(current, questionId, criterion, rating));
   };
 
   const handleReviewUnanswered = () => {
-    const nextQuestion = unansweredQuestions[0] ?? unit.questions.find((question) => flaggedQuestionIds.includes(question.id));
-    if (nextQuestion) {
-      handleSelectQuestion(nextQuestion.id);
+    const targetId = pickReviewTarget(unansweredQuestions, unit.questions, flaggedQuestionIds);
+    if (targetId) {
+      handleSelectQuestion(targetId);
       return;
     }
 
@@ -226,30 +203,15 @@ export function usePracticeSessionState(unit: PracticeUnit) {
   };
 
   const handleAddAnnotation = (annotation: Omit<PassageAnnotation, 'id'>) => {
-    setAnnotations((current) => [
-      ...current,
-      {
-        ...annotation,
-        id: `${annotation.paragraphIndex}-${current.length + 1}-${annotation.text.slice(0, 12)}`,
-      },
-    ]);
+    setAnnotations((current) => addAnnotation(current, annotation));
   };
 
   const handleRemoveAnnotation = (annotationId: string) => {
-    setAnnotations((current) => current.filter((annotation) => annotation.id !== annotationId));
+    setAnnotations((current) => removeAnnotation(current, annotationId));
   };
 
   const handleUpdateAnnotation = (annotationId: string, patch: Partial<Pick<PassageAnnotation, 'kind' | 'note'>>) => {
-    setAnnotations((current) =>
-      current.map((annotation) =>
-        annotation.id === annotationId
-          ? {
-              ...annotation,
-              ...patch,
-            }
-          : annotation
-      )
-    );
+    setAnnotations((current) => updateAnnotation(current, annotationId, patch));
   };
 
   const handleClearAnnotations = () => {
