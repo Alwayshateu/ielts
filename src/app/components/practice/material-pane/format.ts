@@ -1,23 +1,13 @@
 import type { PracticeUnit } from '@/lib/types';
 import type { AnnotationSyncStatus } from '../usePracticeAnnotationSync';
 
-export function formatMinutes(seconds: number | null) {
-  if (!seconds) return '不限时';
-  return `${Math.round(seconds / 60)} 分钟`;
-}
+// mm:ss + minute-duration formatters live in @/lib/practice-clock; re-exported here for material-pane consumers.
+export { formatClock as formatTimer, formatMinutes } from '@/lib/practice-clock';
 
 export function formatMetadataSeconds(value: unknown) {
   if (typeof value !== 'number') return '未设置';
   if (value < 60) return `${value} 秒`;
   return `${Math.round(value / 60)} 分钟`;
-}
-
-export function formatTimer(seconds: number) {
-  const safeSeconds = Math.max(0, seconds);
-  const minutes = Math.floor(safeSeconds / 60);
-  const remainingSeconds = safeSeconds % 60;
-
-  return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
 }
 
 export function formatMetadataValue(value: unknown, fallback = '未设置') {

@@ -26,13 +26,9 @@ import {
 } from '@/lib/practice-session-recommendations';
 import { PRACTICE_HISTORY_HREF } from '@/lib/practice-session-links';
 import { formatDifficulty } from '@/lib/question-labels';
+import { formatMinutes } from '@/lib/practice-clock';
 import type { PracticeUnit } from '@/lib/types';
 import { riseChild, springSnap, staggerParent } from '../ui/motion-presets';
-
-function formatMinutes(seconds: number | null) {
-  if (!seconds) return '不限时';
-  return `${Math.round(seconds / 60)} 分钟`;
-}
 
 function formatMode(mode: PracticeUnit['mode']) {
   const labels: Record<PracticeUnit['mode'], string> = {

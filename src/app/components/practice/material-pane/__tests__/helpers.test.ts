@@ -4,8 +4,6 @@ import {
   annotationSyncCopy,
   formatMetadataSeconds,
   formatMetadataValue,
-  formatMinutes,
-  formatTimer,
   getMaterialText,
 } from '../format';
 import { hasOverlap } from '../selection';
@@ -17,19 +15,6 @@ function makeUnit(overrides: Partial<PracticeUnit>): PracticeUnit {
 function makeAnnotation(overrides: Partial<PassageAnnotation>): PassageAnnotation {
   return { paragraphIndex: 0, startOffset: 0, endOffset: 10, ...overrides } as unknown as PassageAnnotation;
 }
-
-describe('formatMinutes', () => {
-  it('reports unlimited when there is no time budget', () => {
-    expect(formatMinutes(null)).toBe('不限时');
-    expect(formatMinutes(0)).toBe('不限时');
-  });
-
-  it('rounds seconds to whole minutes', () => {
-    expect(formatMinutes(60)).toBe('1 分钟');
-    expect(formatMinutes(120)).toBe('2 分钟');
-    expect(formatMinutes(1800)).toBe('30 分钟');
-  });
-});
 
 describe('formatMetadataSeconds', () => {
   it('falls back for non-numeric values', () => {
@@ -46,20 +31,6 @@ describe('formatMetadataSeconds', () => {
   it('promotes to minutes at or above one minute', () => {
     expect(formatMetadataSeconds(60)).toBe('1 分钟');
     expect(formatMetadataSeconds(180)).toBe('3 分钟');
-  });
-});
-
-describe('formatTimer', () => {
-  it('pads minutes and seconds to two digits', () => {
-    expect(formatTimer(0)).toBe('00:00');
-    expect(formatTimer(9)).toBe('00:09');
-    expect(formatTimer(60)).toBe('01:00');
-    expect(formatTimer(125)).toBe('02:05');
-    expect(formatTimer(3599)).toBe('59:59');
-  });
-
-  it('clamps negative input to zero', () => {
-    expect(formatTimer(-10)).toBe('00:00');
   });
 });
 
