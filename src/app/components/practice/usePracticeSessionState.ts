@@ -15,23 +15,8 @@ import {
   buildPracticeSessionHistoryEntry,
 } from '@/lib/practice-session-history';
 import { buildPracticeReviewReport } from '@/lib/practice-session-report';
-import type { PassageAnnotation, PracticeSkill, PracticeUnit } from '@/lib/types';
-
-const DEFAULT_EXAM_SECONDS_BY_SKILL: Record<PracticeSkill, number> = {
-  foundation: 600,
-  reading: 1200,
-  listening: 600,
-  writing: 2400,
-  speaking: 120,
-};
-
-function getExamDurationSeconds(unit: PracticeUnit) {
-  if (typeof unit.time_limit_seconds === 'number' && unit.time_limit_seconds > 0) {
-    return unit.time_limit_seconds;
-  }
-
-  return DEFAULT_EXAM_SECONDS_BY_SKILL[unit.skill] ?? 600;
-}
+import { getExamDurationSeconds } from '@/lib/practice-session-timing';
+import type { PassageAnnotation, PracticeUnit } from '@/lib/types';
 
 export function usePracticeSessionState(unit: PracticeUnit) {
   const [answers, setAnswers] = useState<Record<string, string>>({});
