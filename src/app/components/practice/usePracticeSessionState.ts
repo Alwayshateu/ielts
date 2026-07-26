@@ -271,6 +271,11 @@ export function usePracticeSessionState(unit: PracticeUnit) {
     setAnnotations([]);
   };
 
+  // Replace the whole set — used only to hydrate from a cloud backup when local is empty.
+  const handleRestoreAnnotations = (restored: PassageAnnotation[]) => {
+    setAnnotations(restored);
+  };
+
   const handleResetPreview = () => {
     setAnswers({});
     setShowResults(false);
@@ -327,6 +332,7 @@ export function usePracticeSessionState(unit: PracticeUnit) {
     activeIndex,
     activeQuestionId,
     annotations,
+    annotationsLoaded,
     autoSubmitted,
     elapsedSeconds,
     examDurationSeconds,
@@ -349,6 +355,7 @@ export function usePracticeSessionState(unit: PracticeUnit) {
     handleExitExam,
     handleRemoveAnnotation,
     handleResetPreview,
+    handleRestoreAnnotations,
     handleReviewNote,
     handleRubricRating,
     handleReviewUnanswered,

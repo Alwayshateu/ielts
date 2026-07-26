@@ -10,6 +10,7 @@ import MaterialPane from './MaterialPane';
 import QuestionNavigator from './QuestionNavigator';
 import SessionControlBar from './SessionControlBar';
 import ResultInspector from './ResultInspector';
+import { usePracticeAnnotationSync } from './usePracticeAnnotationSync';
 import { usePracticeSessionState } from './usePracticeSessionState';
 
 function getSessionMeta(unit: PracticeUnit) {
@@ -54,6 +55,7 @@ export default function PracticeSessionView({ unit }: { unit: PracticeUnit }) {
     activeIndex,
     activeQuestionId,
     annotations,
+    annotationsLoaded,
     autoSubmitted,
     elapsedSeconds,
     examDurationSeconds,
@@ -76,6 +78,7 @@ export default function PracticeSessionView({ unit }: { unit: PracticeUnit }) {
     handleExitExam,
     handleRemoveAnnotation,
     handleResetPreview,
+    handleRestoreAnnotations,
     handleReviewNote,
     handleRubricRating,
     handleReviewUnanswered,
@@ -85,6 +88,12 @@ export default function PracticeSessionView({ unit }: { unit: PracticeUnit }) {
     handleToggleMistakeReason,
     handleUpdateAnnotation,
   } = usePracticeSessionState(unit);
+  const annotationSync = usePracticeAnnotationSync({
+    unitSlug: unit.slug,
+    annotations,
+    annotationsLoaded,
+    onRestore: handleRestoreAnnotations,
+  });
   const sessionMeta = getSessionMeta(unit);
   const SessionIcon = sessionMeta.Icon;
 
@@ -154,6 +163,7 @@ export default function PracticeSessionView({ unit }: { unit: PracticeUnit }) {
             onUpdateAnnotation={handleUpdateAnnotation}
             onRemoveAnnotation={handleRemoveAnnotation}
             onClearAnnotations={handleClearAnnotations}
+            annotationSync={annotationSync}
           />
 
           <section className="space-y-5 lg:col-span-7">

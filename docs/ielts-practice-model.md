@@ -465,9 +465,12 @@ create table public.practice_annotations (
 
 - offset 基于 paragraph plain text，而不是 DOM child index。
 - `selected_text` 用来校验 passage 内容更新后 offset 是否仍然有效。
-- `attempt_id` 可为空：允许用户在未提交 session 前也保留阅读标注。
-- RLS 必须限定 `auth.uid() = user_id`。
-- MVP 可以先保存在浏览器 localStorage；只有确认产品需要跨设备同步时再落库。
+- `attempt_id` 可为空：允许用户在未提交 session 前也保留阅读标注。写入路径只写
+  reading-time 标注（`attempt_id` 恒为 null）。
+- RLS 限定 `auth.uid() = user_id`，五个策略都在（含 delete，见下）。
+
+标注同步现已实现，见 §9.6。localStorage 仍是编辑时的事实源；云端是 opt-in 的跨设备
+备份（开关 `NEXT_PUBLIC_PRACTICE_ANNOTATION_SYNC=on`，默认关）。
 
 ### 7.6 收藏和错题兼容方案
 
@@ -667,12 +670,40 @@ RUN_LIVE_SUPABASE_TESTS=1 npx vitest run src/lib/__tests__/supabase-read-smoke.l
 RUN_LIVE_SUPABASE_TESTS=1 npx vitest run src/lib/__tests__/practice-attempt-sync.live.test.ts
 ```
 
+### 9.6 标注同步（写路径）
+
+Reading / Transcript 的 highlight / note 默认只存 localStorage。开启
+`NEXT_PUBLIC_PRACTICE_ANNOTATION_SYNC=on` 后，标注会作为 opt-in 云端备份同步到
+`practice_annotations`。
+
+```text
+src/lib/practice-annotation-sync.ts    -- 纯函数：PassageAnnotation ↔ DB row、签名去重
+src/lib/practice-annotation-remote.ts  -- 实际读写，slug→uuid 反查，只碰 practice_annotations
+src/app/components/practice/usePracticeAnnotationSync.ts -- 客户端 hook：拉取一次 + 防抖推送
+```
+
+设计要点：
+
+- **localStorage 仍是事实源**。云端是备份。挂载时（已登录）只在**本地为空**时才从云端恢复，
+  绝不覆盖本地正在编辑的标注 —— local always wins。
+- **幂等靠删旧插新**。`practice_annotations` 没有可用于 `ON CONFLICT` 的唯一约束，所以每次
+  同步是「删掉本用户本 unit 的 reading 标注（`attempt_id is null`）+ 插入当前集」。天然幂等，
+  重复推送不产生重复行。delete + insert 不是单事务；localStorage 兜底，部分失败下次变更自动重推。
+- **签名去重**避免恢复回声：`annotationsSignature` 只看内容不看 id，恢复回来的行虽然带云端 id
+  但内容一致，签名相同 → 不会触发一次多余的回推。
+- 本地题库没有对应 DB 行的 unit 会被**跳过**而不是猜测目标行。
+- RLS 保证只能读写自己的标注；跨用户读取返回空（live 测试钉住）。
+
+```bash
+RUN_LIVE_SUPABASE_TESTS=1 npx vitest run src/lib/__tests__/practice-annotations.live.test.ts
+```
+
 ### 9.2 MaterialPane
 
 负责显示：
 
 - passage_text
-- local highlight / note annotations（当前可先 localStorage，后续可接 `practice_annotations`）
+- local highlight / note annotations（localStorage 事实源，opt-in 同步到 `practice_annotations`，见 §9.6）
 - audio player
 - transcript
 - writing task asset
@@ -854,16 +885,16 @@ else:
 - [x] 7. Listening transcript + audio MVP。
 - [x] 8. Writing / Speaking manual preview MVP。
 - [x] 9. Session 写入 `practice_attempts` / `practice_answers`（见 §9.5，env-gated）。
-- [ ] 10. Dashboard 读取 session stats（当前读 localStorage，未接 DB）。
-- [ ] 11. 错题本 / 收藏联动 practice question context。
+- [x] 10. Dashboard 读取 session stats（`dashboard-stats.ts` 聚合 `practice_attempts`）。
+- [x] 11. 错题本 / 收藏联动 practice question context（见 §14）。
 - [x] 12. Listening audio_url 播放和 transcript sync（含 karaoke 高亮、点击 seek）。
 - [x] 13. Writing / Speaking rubric、自评、录音（MediaRecorder）。
+- [x] 14. Reading / Transcript 标注持久化到 `practice_annotations`（env-gated，见 §9.6）。
 
 已完成但不在原清单里的：Exam Mode（限时 + 自动交卷）、Writing 反馈面板（字数 / 句长 /
 结构 checklist）、单次 attempt 详情页（逐题回顾 + 与历史对比）。
 
-后续候选：annotations 持久化到 `practice_annotations`、Listening 换成真人录音、
-把 legacy 单题流程和 Session 流程合并成一个入口。
+后续候选：Listening 换成真人录音、把 legacy 单题流程和 Session 流程合并成一个入口。
 
 ## 14. 两套流程的合并状态
 

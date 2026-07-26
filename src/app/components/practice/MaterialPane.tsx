@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { PassageAnnotation, PracticeUnit } from '@/lib/types';
+import type { AnnotationSyncStatus } from './usePracticeAnnotationSync';
 import { formatDifficulty } from '@/lib/question-labels';
 import {
   clampPlaybackTime,
@@ -179,6 +180,21 @@ function getMaterialMeta(unit: PracticeUnit) {
   };
 }
 
+function annotationSyncCopy(sync: { status: AnnotationSyncStatus; restoredCount: number }): string {
+  switch (sync.status) {
+    case 'syncing':
+      return '，正在同步到云端…';
+    case 'error':
+      return '，本机已保存，云端同步暂时失败，改动后会自动重试。';
+    case 'synced':
+      return sync.restoredCount > 0
+        ? `，已与云端同步（含 ${sync.restoredCount} 条从云端恢复），换设备也能看到。`
+        : '，已同步到云端，换设备也能看到。';
+    default:
+      return '，本机已保存，改动后会同步到云端。';
+  }
+}
+
 export default function MaterialPane({
   unit,
   annotations,
@@ -186,6 +202,7 @@ export default function MaterialPane({
   onUpdateAnnotation,
   onRemoveAnnotation,
   onClearAnnotations,
+  annotationSync,
 }: {
   unit: PracticeUnit;
   annotations: PassageAnnotation[];
@@ -193,6 +210,7 @@ export default function MaterialPane({
   onUpdateAnnotation: (annotationId: string, patch: Partial<Pick<PassageAnnotation, 'kind' | 'note'>>) => void;
   onRemoveAnnotation: (annotationId: string) => void;
   onClearAnnotations: () => void;
+  annotationSync?: { enabled: boolean; status: AnnotationSyncStatus; restoredCount: number };
 }) {
   const materialText = getMaterialText(unit);
   const paragraphs = useMemo(() => materialText.split('\n\n').filter(Boolean), [materialText]);
@@ -374,7 +392,10 @@ export default function MaterialPane({
             </div>
             <p className="mt-4 rounded-2xl border border-white/10 bg-white/[0.06] px-3 py-2 text-xs leading-relaxed text-white/55">
               选中 {materialMeta.hintTarget} 文字后可以 highlight 或添加 note。当前标注
-              {highlightCount + noteCount} 条，只保存在本机浏览器，不会写入数据库。
+              {highlightCount + noteCount} 条
+              {annotationSync?.enabled
+                ? annotationSyncCopy(annotationSync)
+                : '，只保存在本机浏览器，不会写入数据库。'}
             </p>
           </div>
         </div>
