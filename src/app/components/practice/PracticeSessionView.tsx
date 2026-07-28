@@ -104,7 +104,7 @@ export default function PracticeSessionView({ unit }: { unit: PracticeUnit }) {
           <div>
             <Link
               href="/practice"
-              className="mb-5 flex w-fit items-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium text-ink-muted transition-all hover:-translate-y-0.5 hover:border-zinc-300 hover:text-ink active:scale-[0.98]"
+              className="mb-5 flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium text-ink-muted transition-colors hover:bg-zinc-100 hover:text-ink active:scale-[0.98]"
             >
               <ArrowLeft size={17} weight="bold" />
               返回单题练习
@@ -113,17 +113,17 @@ export default function PracticeSessionView({ unit }: { unit: PracticeUnit }) {
               <SessionIcon size={14} weight="regular" />
               {sessionMeta.label}
             </span>
-            <h1 className="text-display mt-4 max-w-3xl text-4xl font-semibold text-ink sm:text-5xl">
+            <h1 className="text-tight mt-4 max-w-3xl text-3xl font-semibold text-ink sm:text-4xl">
               {sessionMeta.title}
             </h1>
-            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-ink-subtle">
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-subtle">
               {sessionMeta.description}
             </p>
           </div>
 
-          <div className="rounded-[1.5rem] border border-line bg-surface p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.78),0_14px_38px_-34px_rgba(24,24,27,0.34)]">
+          <div className="rounded-2xl border border-line bg-surface p-4">
             <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-accent-tint text-accent">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-tint text-accent">
                 <ListChecks size={20} weight="regular" />
               </span>
               <div>

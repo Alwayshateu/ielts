@@ -27,7 +27,7 @@ export default function QuestionNavigator({
   const score = showResults ? scorePracticeAnswers(questions, answers) : null;
 
   return (
-    <div className="rounded-[1.5rem] border border-line bg-surface p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.78),0_14px_38px_-34px_rgba(24,24,27,0.34)]">
+    <div className="rounded-2xl border border-line bg-surface p-4">
       <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-sm font-semibold text-ink">题组导航</p>
