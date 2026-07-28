@@ -14,7 +14,6 @@ import { useState } from 'react';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
 import { countCollectionSources, type CollectionItem } from '@/lib/collection-items';
 import { formatCategory, formatDifficulty } from '@/lib/question-labels';
-import { PRACTICE_SESSIONS_HREF } from '@/lib/practice-session-links';
 import { removeCollectionItem } from '@/lib/question-collections';
 import EmptyState from '../ui/EmptyState';
 import { riseChild, springSnap, staggerParent } from '../ui/motion-presets';
@@ -115,90 +114,32 @@ export default function ReviewCollectionView({
   };
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-      <motion.header
-        variants={staggerParent(0.06)}
-        initial="hidden"
-        animate="show"
-        className="mb-8 grid gap-5 lg:grid-cols-[0.85fr_1.15fr] lg:items-stretch"
-      >
-        <motion.div
-          variants={riseChild}
-          whileHover={{ y: -6, scale: 1.012 }}
-          transition={springSnap}
-          className="group relative overflow-hidden rounded-[2rem] border border-line bg-surface p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_20px_54px_-36px_rgba(24,24,27,0.35)] transition-colors hover:border-accent/25"
-        >
-          <div className="pointer-events-none absolute -right-16 -top-20 h-52 w-52 rounded-full bg-accent/14 opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-100" aria-hidden="true" />
-          <div className="relative flex items-start gap-4">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-accent-tint text-accent transition-colors duration-300 group-hover:bg-accent group-hover:text-white">
-              <Icon size={23} weight={kind === 'favorites' ? 'fill' : 'regular'} />
-            </span>
-            <div>
-              <p className="text-xs font-semibold tracking-wide text-ink-subtle">Review Collection</p>
-              <h1 className="text-tight mt-2 text-3xl font-semibold text-ink">{copy.title}</h1>
-              <p className="mt-2 text-sm text-ink-subtle">{copy.count(sources.total)}</p>
-              {sources.practice > 0 && (
-                <p className="mt-1 text-xs text-ink-muted">
-                  其中 {sources.practice} 道来自 Session 训练
-                  {sources.legacy > 0 && `，${sources.legacy} 道来自单题练习`}
-                </p>
-              )}
-            </div>
-          </div>
-        </motion.div>
-
-        <motion.div
-          variants={riseChild}
-          className="relative overflow-hidden rounded-[2rem] border border-line bg-ink p-6 text-white shadow-[0_24px_60px_-38px_rgba(24,24,27,0.85)]"
-        >
-          <div className="pointer-events-none absolute -right-14 -top-20 h-52 w-52 rounded-full bg-white/10 blur-3xl" aria-hidden="true" />
-          <div className="relative">
-            <p className="text-xs font-semibold tracking-wide text-white/50">复习策略</p>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/65">
-              {copy.strategy}
-            </p>
-            <div className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-white/65">
-              <span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1">先回忆答案</span>
-              <span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1">再展开解析</span>
-              <span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-1">最后处理队列</span>
-            </div>
-          </div>
-        </motion.div>
-      </motion.header>
-
-      <motion.section
-        variants={riseChild}
-        initial="hidden"
-        animate="show"
-        className="mb-6 overflow-hidden rounded-[2rem] border border-emerald-200/70 bg-emerald-50 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.78),0_18px_48px_-38px_rgba(5,150,105,0.28)]"
-      >
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
+      <motion.header variants={staggerParent(0.06)} initial="hidden" animate="show">
+        <motion.div variants={riseChild} className="flex items-start gap-4">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-accent-tint text-accent">
+            <Icon size={23} weight={kind === 'favorites' ? 'fill' : 'regular'} />
+          </span>
           <div>
-            <p className="text-xs font-semibold tracking-wide text-emerald-700">Session 训练</p>
-            <h2 className="mt-2 text-xl font-semibold text-emerald-950">
-              {sources.practice > 0
-                ? '单题练习和 Session 的记录已经合并在这里'
-                : '在 Session 里做题也会记录到这里'}
-            </h2>
-            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-emerald-800/75">
-              {kind === 'wrong-book'
-                ? '两套流程的错题现在共用同一个错题本。Session 里的错因标签和 Writing / Speaking 自评仍保存在本机浏览器。'
-                : '两套流程的收藏现在共用同一个收藏夹。Session 里的标记和笔记仍保存在本机浏览器。'}
-            </p>
+            <h1 className="text-tight text-3xl font-semibold text-ink">{copy.title}</h1>
+            <p className="mt-1.5 text-sm text-ink-subtle">{copy.count(sources.total)}</p>
+            {sources.practice > 0 && (
+              <p className="mt-1 text-xs text-ink-muted">
+                其中 {sources.practice} 道来自 Session 训练
+                {sources.legacy > 0 && `，${sources.legacy} 道来自单题练习`}
+              </p>
+            )}
           </div>
-          <Link
-            href={PRACTICE_SESSIONS_HREF}
-            className="flex w-fit items-center justify-center rounded-full bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-emerald-800 active:scale-[0.98]"
-          >
-            去 Session Library
-          </Link>
-        </div>
-      </motion.section>
+        </motion.div>
+        <motion.p variants={riseChild} className="mt-4 border-l-2 border-line pl-4 text-sm leading-relaxed text-ink-subtle">
+          {copy.strategy}
+        </motion.p>
+      </motion.header>
 
       {degraded && (
         <p
           role="status"
-          className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+          className="mt-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
         >
           Session 来源的记录暂时读取失败，下面只显示单题练习的部分。刷新可以重试。
         </p>
@@ -212,7 +153,7 @@ export default function ReviewCollectionView({
             exit={{ opacity: 0 }}
             transition={springSnap}
             role="status"
-            className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+            className="mt-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
           >
             {error}
           </motion.p>
@@ -220,19 +161,21 @@ export default function ReviewCollectionView({
       </AnimatePresence>
 
       {items.length === 0 ? (
-        <EmptyState
-          icon={Icon}
-          title={copy.emptyTitle}
-          description={copy.emptyDescription}
-          actionLabel={copy.emptyAction}
-          onAction={() => router.push('/dashboard')}
-        />
+        <div className="mt-8">
+          <EmptyState
+            icon={Icon}
+            title={copy.emptyTitle}
+            description={copy.emptyDescription}
+            actionLabel={copy.emptyAction}
+            onAction={() => router.push('/dashboard')}
+          />
+        </div>
       ) : (
         <motion.div
           variants={staggerParent(0.05)}
           initial="hidden"
           animate="show"
-          className="overflow-hidden rounded-[2rem] border border-line bg-surface shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_20px_54px_-34px_rgba(24,24,27,0.30)]"
+          className="mt-8 overflow-hidden rounded-2xl border border-line bg-surface"
         >
           {items.map((item, index) => {
             const expanded = expandedId === item.entryId;
@@ -246,14 +189,10 @@ export default function ReviewCollectionView({
                 key={item.entryId}
                 layout
                 variants={riseChild}
-                whileHover={{ y: -3 }}
                 transition={springSnap}
-                className="group relative border-b border-line last:border-b-0"
+                className="border-b border-line last:border-b-0"
               >
-                <div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100" aria-hidden="true">
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_86%_0%,rgba(79,70,229,0.14),transparent_38%),linear-gradient(135deg,rgba(255,255,255,0.98),rgba(248,250,252,0.86))]" />
-                </div>
-                <div className="relative px-5 py-5 sm:px-7 sm:py-6">
+                <div className="px-5 py-5 sm:px-6">
                   <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0 flex-1">
                       <div className="mb-3 flex flex-wrap items-center gap-2">
@@ -269,7 +208,7 @@ export default function ReviewCollectionView({
                           </span>
                         )}
                       </div>
-                      <h2 className="text-base font-semibold leading-relaxed text-ink transition-colors group-hover:text-accent sm:text-lg">
+                      <h2 className="text-base font-semibold leading-relaxed text-ink sm:text-lg">
                         <span className="mr-2 text-ink-subtle">{index + 1}.</span>
                         {item.questionText}
                       </h2>
@@ -279,7 +218,7 @@ export default function ReviewCollectionView({
                       {item.href && (
                         <Link
                           href={item.href}
-                          className="flex items-center gap-1.5 rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium text-ink-muted shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] transition-all hover:-translate-y-0.5 hover:border-accent/30 hover:bg-accent-tint hover:text-accent active:scale-[0.98]"
+                          className="flex items-center gap-1.5 rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium text-ink-muted transition-colors hover:border-accent/30 hover:bg-accent-tint hover:text-accent active:scale-[0.98]"
                         >
                           去重练
                         </Link>
@@ -289,7 +228,7 @@ export default function ReviewCollectionView({
                         onClick={() => toggleExpanded(item.entryId)}
                         aria-expanded={expanded}
                         aria-controls={detailsId}
-                        className="flex items-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium text-ink-muted shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] transition-all hover:-translate-y-0.5 hover:border-accent/30 hover:bg-accent-tint hover:text-accent active:scale-[0.98]"
+                        className="flex items-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium text-ink-muted transition-colors hover:border-accent/30 hover:bg-accent-tint hover:text-accent active:scale-[0.98]"
                       >
                         {expanded ? '收起详情' : '查看详情'}
                         <motion.span
@@ -308,7 +247,7 @@ export default function ReviewCollectionView({
                         aria-label={copy.removeLabel}
                         aria-controls={needsConfirmation ? confirmationId : undefined}
                         aria-expanded={needsConfirmation ? confirming : undefined}
-                        className="flex h-9 w-9 items-center justify-center rounded-full text-ink-subtle transition-all hover:-translate-y-0.5 hover:bg-red-50 hover:text-red-600 active:scale-[0.96] disabled:cursor-wait disabled:opacity-60"
+                        className="flex h-9 w-9 items-center justify-center rounded-full text-ink-subtle transition-colors hover:bg-red-50 hover:text-red-600 active:scale-[0.96] disabled:cursor-wait disabled:opacity-60"
                       >
                         {removing ? (
                           <CircleNotch size={18} weight="bold" className="animate-spin" />
@@ -329,7 +268,7 @@ export default function ReviewCollectionView({
                         transition={springSnap}
                         role="group"
                         aria-label="确认移出错题本"
-                        className="mt-5 flex flex-col gap-3 rounded-2xl border border-amber-200/70 bg-amber-50/85 px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_18px_42px_-34px_rgba(245,158,11,0.45)] sm:flex-row sm:items-center sm:justify-between"
+                        className="mt-5 flex flex-col gap-3 rounded-2xl border border-amber-200/70 bg-amber-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
                       >
                         <p className="text-sm font-medium text-orange-900">
                           已经掌握这道题，并将它移出错题本？
