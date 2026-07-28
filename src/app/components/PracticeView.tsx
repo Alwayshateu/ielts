@@ -9,16 +9,13 @@ import {
   BookOpenText,
   CheckCircle,
   CircleNotch,
-  ClipboardText,
   Heart,
-  Target,
   WarningCircle,
   XCircle,
 } from '@phosphor-icons/react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
 import { formatCategory, formatDifficulty } from '@/lib/question-labels';
-import { PRACTICE_SESSIONS_HREF } from '@/lib/practice-session-links';
 import type { IeltsQuestion } from '@/lib/types';
 import { riseChild, springSnap, springSoft, staggerParent } from './ui/motion-presets';
 
@@ -225,29 +222,16 @@ export default function PracticeView({ userId }: { userId: string }) {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-6 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="mb-5 flex w-fit items-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium text-ink-muted transition-colors hover:border-zinc-300 hover:text-ink active:scale-[0.98]"
-          >
-            <ArrowLeft size={17} weight="bold" />
-            退出练习
-          </button>
-          <span className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1 text-xs font-semibold text-ink-subtle">
-            <Target size={14} weight="regular" />
-            Practice Workstation
-          </span>
-          <h1 className="text-display mt-4 max-w-2xl text-3xl font-semibold text-ink sm:text-4xl">
-            先读任务，再提交答案。
-          </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-subtle">
-            当前先用现有题库模拟训练工作台：材料、题干、作答和复盘分区呈现，后续可以自然升级为 Passage / Section / Task 的考试式界面。
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium text-ink-muted transition-colors hover:bg-zinc-100 hover:text-ink active:scale-[0.98]"
+        >
+          <ArrowLeft size={17} weight="bold" />
+          退出练习
+        </button>
+        <div className="flex flex-wrap items-center gap-2">
           <span className="rounded-full bg-accent-tint px-3 py-1 text-xs font-semibold text-accent">
             {sessionMode}
           </span>
@@ -257,62 +241,15 @@ export default function PracticeView({ userId }: { userId: string }) {
           <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-semibold text-ink-muted">
             {answerMode}
           </span>
-          <span className="rounded-full border border-line bg-surface px-3 py-1 text-xs font-medium text-ink-subtle">
-            Enter 提交
-          </span>
-          <span className="rounded-full border border-line bg-surface px-3 py-1 text-xs font-medium text-ink-subtle">
-            Space 下一题
-          </span>
         </div>
       </div>
 
-      <div className="mb-5 grid gap-3 lg:grid-cols-2">
-        <div className="rounded-[1.5rem] border border-line bg-surface/80 p-4 shadow-[0_14px_40px_-36px_rgba(24,24,27,0.35)]">
-          <p className="text-xs font-semibold text-accent">快速单题练习</p>
-          <h2 className="mt-2 text-lg font-semibold text-ink">保持当前题库节奏</h2>
-          <p className="mt-1 text-xs leading-relaxed text-ink-subtle">
-            适合 5 分钟热身。提交会继续写入 legacy history / wrong book / favorites。
-          </p>
-        </div>
-        <Link
-          href={PRACTICE_SESSIONS_HREF}
-          className="group rounded-[1.5rem] border border-emerald-200 bg-emerald-50 p-4 shadow-[0_14px_40px_-36px_rgba(5,150,105,0.35)] transition-all hover:-translate-y-0.5 hover:border-emerald-300 active:scale-[0.99]"
-        >
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold text-emerald-700">完整 Session 训练</p>
-              <h2 className="mt-2 text-lg font-semibold text-emerald-950">进入材料 + 题组 + 复盘</h2>
-              <p className="mt-1 text-xs leading-relaxed text-emerald-800/75">
-                新 IELTS 主线。当前使用本地草稿、标注、错因标签和 rubric 自评。
-              </p>
-            </div>
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white text-emerald-700 transition-transform group-hover:translate-x-1">
-              <ArrowRight size={17} weight="bold" />
-            </span>
-          </div>
-        </Link>
-      </div>
-
-      <div className="mb-5 rounded-[1.5rem] border border-line bg-surface/80 px-4 py-3 shadow-[0_14px_40px_-36px_rgba(24,24,27,0.35)]">
-        <div className="flex items-start gap-3">
-          <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-accent-tint text-accent">
-            <BookOpenText size={16} weight="regular" />
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold text-ink">后续 IELTS 真实练习形态</p>
-            <p className="mt-1 text-xs leading-relaxed text-ink-subtle">
-              真正的 IELTS 应该是一整篇 Passage / 一个 Listening Section / 一组 Task，下面挂多道关联题。当前先保留单题训练工作台，之后会升级成“大材料 + 多题组”的考试式界面。
-            </p>
-            <Link
-              href={PRACTICE_SESSIONS_HREF}
-              className="mt-3 inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-ink-muted transition-all hover:-translate-y-0.5 hover:border-accent/30 hover:bg-accent-tint hover:text-accent active:scale-[0.98]"
-            >
-              查看 Session Library
-              <ArrowRight size={13} weight="bold" />
-            </Link>
-          </div>
-        </div>
-      </div>
+      <header className="mt-6">
+        <h1 className="text-tight text-3xl font-semibold text-ink">单题练习</h1>
+        <p className="mt-2 text-sm leading-relaxed text-ink-subtle">
+          从题库随机抽题快速热身，提交会写入历史 / 错题本 / 收藏。按 Enter 提交，答完按 Space 下一题。
+        </p>
+      </header>
 
       <AnimatePresence initial={false}>
         {message && (
@@ -322,7 +259,7 @@ export default function PracticeView({ userId }: { userId: string }) {
             exit={{ opacity: 0 }}
             transition={springSnap}
             role="status"
-            className="mb-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
+            className="mt-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800"
           >
             {message}
           </motion.p>
@@ -333,85 +270,57 @@ export default function PracticeView({ userId }: { userId: string }) {
         variants={staggerParent(0.06)}
         initial="hidden"
         animate="show"
-        className="grid grid-cols-1 gap-6 lg:grid-cols-12"
+        className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-12"
       >
-        <motion.aside
-          variants={riseChild}
-          className="lg:col-span-5"
-        >
-          <div className="sticky top-6 overflow-hidden rounded-3xl border border-line bg-surface shadow-[0_18px_48px_-34px_rgba(24,24,27,0.35)]">
-            <div className="relative border-b border-line bg-ink p-5 text-white sm:p-6">
-              <div className="pointer-events-none absolute -right-14 -top-20 h-48 w-48 rounded-full bg-white/10 blur-3xl" aria-hidden="true" />
-              <div className="relative flex items-start justify-between gap-4">
-                <div>
-                  <p className="text-xs font-semibold tracking-wide text-white/50">训练任务</p>
-                  <h2 className="mt-2 text-2xl font-semibold">{sessionMode}</h2>
-                  <p className="mt-2 text-sm leading-relaxed text-white/60">
-                    {hasArticle
-                      ? '先浏览材料，再回到右侧完成作答。不要急着看答案，先定位依据。'
-                      : '这道题没有长材料，重点放在题干理解、答案表达和提交后的解析复盘。'}
-                  </p>
-                </div>
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-white">
-                  <ClipboardText size={22} weight="regular" />
-                </span>
-              </div>
-            </div>
-
+        <motion.aside variants={riseChild} className="lg:col-span-5">
+          <div className="sticky top-6 overflow-hidden rounded-2xl border border-line bg-surface">
             {hasArticle ? (
-              <div className="max-h-[64dvh] overflow-y-auto p-5 sm:p-6">
-                <div className="mb-5 flex items-center gap-2 border-b border-line pb-3 text-sm font-semibold text-accent">
-                  <BookOpenText size={18} weight="regular" />
+              <div className="max-h-[60dvh] overflow-y-auto p-5 sm:p-6">
+                <div className="mb-5 flex items-center gap-2 border-b border-line pb-3 text-sm font-semibold text-ink">
+                  <BookOpenText size={18} weight="regular" className="text-accent" />
                   阅读原文
                 </div>
                 <article
                   className="text-sm leading-7 text-ink-muted"
                   dangerouslySetInnerHTML={{ __html: question.article_content ?? '' }}
                 />
-                <div className="mt-6 grid grid-cols-3 gap-2 rounded-2xl border border-line bg-zinc-50 p-3">
-                  <SessionMetric label="本轮" value={String(sessionStats.attempts)} />
-                  <SessionMetric label="正确" value={sessionAccuracy === null ? '—' : `${sessionAccuracy}%`} />
-                  <SessionMetric label="连对" value={String(sessionStats.streak)} />
-                </div>
               </div>
             ) : (
               <div className="space-y-4 p-5 sm:p-6">
-                <div className="rounded-2xl border border-line bg-zinc-50 p-4">
-                  <p className="text-xs font-semibold text-ink-subtle">作答策略</p>
-                  <p className="mt-2 text-sm leading-relaxed text-ink-muted">
+                <div>
+                  <p className="text-sm font-semibold text-ink">作答策略</p>
+                  <p className="mt-2 text-sm leading-relaxed text-ink-subtle">
                     先判断题型要求，再提交最小确定答案。答错会自动进入错题本，方便之后集中复盘。
                   </p>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="rounded-2xl border border-line bg-zinc-50 p-4">
+                <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-line bg-line">
+                  <div className="bg-surface p-4">
                     <p className="text-xs text-ink-subtle">题目分类</p>
                     <p className="mt-2 font-semibold text-ink">{formatCategory(question.category)}</p>
                   </div>
-                  <div className="rounded-2xl border border-line bg-zinc-50 p-4">
+                  <div className="bg-surface p-4">
                     <p className="text-xs text-ink-subtle">训练强度</p>
                     <p className="mt-2 font-semibold text-ink">{formatDifficulty(question.difficulty)}</p>
                   </div>
                 </div>
-                <div className="grid grid-cols-3 gap-2 rounded-2xl border border-line bg-white p-3">
-                  <SessionMetric label="本轮" value={String(sessionStats.attempts)} />
-                  <SessionMetric label="正确" value={sessionAccuracy === null ? '—' : `${sessionAccuracy}%`} />
-                  <SessionMetric label="连对" value={String(sessionStats.streak)} />
-                </div>
               </div>
             )}
+
+            <div className="grid grid-cols-3 gap-px overflow-hidden border-t border-line bg-line">
+              <SessionMetric label="本轮" value={String(sessionStats.attempts)} />
+              <SessionMetric label="正确" value={sessionAccuracy === null ? '—' : `${sessionAccuracy}%`} />
+              <SessionMetric label="连对" value={String(sessionStats.streak)} />
+            </div>
           </div>
         </motion.aside>
 
-        <motion.section
-          variants={riseChild}
-          className="lg:col-span-7"
-        >
-          <div className="overflow-hidden rounded-3xl border border-line bg-surface shadow-[0_20px_50px_-30px_rgba(24,24,27,0.38)]">
-            <div className="border-b border-line px-5 py-6 sm:px-7 sm:py-7">
+        <motion.section variants={riseChild} className="lg:col-span-7">
+          <div className="overflow-hidden rounded-2xl border border-line bg-surface">
+            <div className="border-b border-line px-5 py-6 sm:px-7">
               <div className="flex items-start justify-between gap-4">
-                <h1 className="text-tight text-xl font-semibold leading-snug text-ink sm:text-2xl">
+                <h2 className="text-tight text-xl font-semibold leading-snug text-ink sm:text-2xl">
                   {question.question_text}
-                </h1>
+                </h2>
                 <button
                   type="button"
                   onClick={() => void toggleFavorite()}
@@ -428,9 +337,9 @@ export default function PracticeView({ userId }: { userId: string }) {
               </div>
             </div>
 
-            <div className="bg-zinc-50/70 px-5 py-6 sm:px-7 sm:py-7">
+            <div className="bg-canvas px-5 py-6 sm:px-7">
               {question.type === 'multiple_choice' && question.options ? (
-                <div className="overflow-hidden rounded-3xl border border-line bg-surface" role="radiogroup" aria-label="选择答案">
+                <div className="overflow-hidden rounded-2xl border border-line bg-surface" role="radiogroup" aria-label="选择答案">
                   {question.options.map((option, index) => {
                     const selected = userAnswer === option;
                     const marker = String.fromCharCode(65 + index);
@@ -445,7 +354,7 @@ export default function PracticeView({ userId }: { userId: string }) {
                         className={`group/option flex w-full items-start gap-4 border-b border-line px-4 py-4 text-left text-sm transition-colors last:border-b-0 active:scale-[0.995] disabled:cursor-default ${
                           selected
                             ? 'bg-accent-tint text-ink'
-                            : 'text-ink-muted hover:bg-white hover:text-ink'
+                            : 'text-ink-muted hover:bg-zinc-50 hover:text-ink'
                         } ${answered && !selected ? 'opacity-50' : ''}`}
                       >
                         <span
@@ -472,7 +381,7 @@ export default function PracticeView({ userId }: { userId: string }) {
                     disabled={answered}
                     onChange={(event) => setUserAnswer(event.target.value)}
                     placeholder="请输入你的答案..."
-                    className="w-full rounded-2xl border border-line bg-surface px-4 py-4 text-lg text-ink shadow-[0_6px_20px_-18px_rgba(24,24,27,0.45)] outline-none transition-colors placeholder:text-ink-subtle focus:border-accent disabled:cursor-default disabled:bg-zinc-100"
+                    className="w-full rounded-xl border border-line bg-surface px-4 py-4 text-lg text-ink outline-none transition-colors placeholder:text-ink-subtle focus:border-accent focus:ring-4 focus:ring-accent/10 disabled:cursor-default disabled:bg-zinc-100"
                   />
                 </label>
               )}
@@ -482,7 +391,7 @@ export default function PracticeView({ userId }: { userId: string }) {
                   type="button"
                   onClick={() => void handleSubmit()}
                   disabled={!userAnswer.trim() || saving}
-                  className="mt-7 flex w-full items-center justify-center gap-2 rounded-2xl bg-ink px-5 py-4 text-sm font-semibold text-white shadow-[0_18px_36px_-24px_rgba(24,24,27,0.8)] transition-colors hover:bg-zinc-800 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-zinc-300 disabled:text-zinc-500"
+                  className="mt-7 flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-5 py-4 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-zinc-300 disabled:text-zinc-500"
                 >
                   {saving && <CircleNotch size={17} weight="bold" className="animate-spin" />}
                   提交答案 (Enter)
@@ -498,7 +407,7 @@ export default function PracticeView({ userId }: { userId: string }) {
                   exit={{ opacity: 0 }}
                   transition={springSoft}
                   role="status"
-                  className={`border-t px-5 py-6 sm:px-7 sm:py-7 ${
+                  className={`border-t px-5 py-6 sm:px-7 ${
                     status === 'correct'
                       ? 'border-emerald-200 bg-emerald-50'
                       : 'border-red-200 bg-red-50'
@@ -506,7 +415,7 @@ export default function PracticeView({ userId }: { userId: string }) {
                 >
                   <div className="flex gap-4">
                     <span
-                      className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${
+                      className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
                         status === 'correct'
                           ? 'bg-emerald-100 text-emerald-700'
                           : 'bg-red-100 text-red-700'
@@ -519,28 +428,27 @@ export default function PracticeView({ userId }: { userId: string }) {
                       )}
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-semibold tracking-wide text-ink-subtle">Answer Inspector</p>
-                      <h2
-                        className={`mt-1 text-lg font-semibold ${
+                      <h3
+                        className={`text-lg font-semibold ${
                           status === 'correct' ? 'text-emerald-900' : 'text-red-900'
                         }`}
                       >
                         {status === 'correct' ? '回答正确，记录已保存' : '回答错误，已加入复盘队列'}
-                      </h2>
+                      </h3>
 
                       <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                        <div className="rounded-2xl border border-white/70 bg-white/65 p-4">
+                        <div className="rounded-xl border border-line bg-surface p-4">
                           <p className="text-xs font-semibold text-ink-subtle">你的答案</p>
                           <p className="mt-1 font-semibold text-ink">{userAnswer}</p>
                         </div>
-                        <div className="rounded-2xl border border-white/70 bg-white/65 p-4">
+                        <div className="rounded-xl border border-line bg-surface p-4">
                           <p className="text-xs font-semibold text-ink-subtle">正确答案</p>
                           <p className="mt-1 font-semibold text-ink">{question.correct_answer}</p>
                         </div>
                       </div>
 
                       {question.explanation && (
-                        <div className="mt-4 rounded-2xl border border-white/70 bg-white/65 p-4 text-sm leading-relaxed text-ink-muted">
+                        <div className="mt-3 rounded-xl border border-line bg-surface p-4 text-sm leading-relaxed text-ink-muted">
                           <span className="font-semibold text-ink">解析：</span>
                           {question.explanation}
                         </div>
@@ -552,7 +460,7 @@ export default function PracticeView({ userId }: { userId: string }) {
                     {status === 'wrong' && (
                       <Link
                         href="/wrong-book"
-                        className="rounded-full border border-line bg-surface px-5 py-3 text-center text-sm font-semibold text-ink-muted transition-colors hover:border-red-200 hover:bg-white hover:text-red-700 active:scale-[0.98]"
+                        className="rounded-full border border-line bg-surface px-5 py-3 text-center text-sm font-semibold text-ink-muted transition-colors hover:border-red-200 hover:text-red-700 active:scale-[0.98]"
                       >
                         稍后集中复盘
                       </Link>
@@ -560,7 +468,7 @@ export default function PracticeView({ userId }: { userId: string }) {
                     <button
                       type="button"
                       onClick={() => void toggleFavorite()}
-                      className="flex items-center justify-center gap-2 rounded-full border border-line bg-surface px-5 py-3 text-sm font-semibold text-ink-muted transition-colors hover:border-accent/30 hover:bg-white hover:text-accent active:scale-[0.98]"
+                      className="flex items-center justify-center gap-2 rounded-full border border-line bg-surface px-5 py-3 text-sm font-semibold text-ink-muted transition-colors hover:border-accent/30 hover:text-accent active:scale-[0.98]"
                     >
                       <Heart size={17} weight={isFavorited ? 'fill' : 'regular'} />
                       {isFavorited ? '已收藏' : '收藏此题'}
@@ -568,7 +476,7 @@ export default function PracticeView({ userId }: { userId: string }) {
                     <button
                       type="button"
                       onClick={() => void fetchQuestion()}
-                      className="flex items-center justify-center gap-2 rounded-full border border-line bg-surface px-5 py-3 text-sm font-semibold text-ink transition-colors hover:border-zinc-300 hover:bg-zinc-50 active:scale-[0.98]"
+                      className="flex items-center justify-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 active:scale-[0.98]"
                     >
                       下一题 (Space)
                       <ArrowRight size={17} weight="bold" />
@@ -586,7 +494,7 @@ export default function PracticeView({ userId }: { userId: string }) {
 
 function SessionMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl bg-white px-3 py-2 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
+    <div className="bg-surface px-3 py-3 text-center">
       <p className="text-lg font-semibold tabular-nums text-ink">{value}</p>
       <p className="mt-0.5 text-[11px] font-medium text-ink-subtle">{label}</p>
     </div>
