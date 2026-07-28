@@ -25,9 +25,9 @@
 
 1. **按 passage/section 跑 MinerU**(别整本 PDF 一次跑,图集会乱):得到 `xxx.md` + `xxx_content_list.json` + `images/` 目录。
 2. **用 `content_list.json`(不是 markdown)做「图↔题」映射**:里面每个块带 `type`(text/image/table)、`img_path`、`page`。按页码 + 位置 + 周围题号把图归到对应 unit / question。写作 Task1 一图对一 task 最简单;听力地图在它所标注题号组的正上方。
-3. **重命名成稳定、可读**:`cam18-t1-writing-task1.png`、`cam18-t1-listening-p2-map.png`。
-4. **上传 Supabase Storage**(见 [§5](#5-图片存储supabase-storage))。
-5. **在 JSON 里填 URL**:unit 级填 `asset_url`,question 级填 `metadata.assetUrl`。
+3. **重命名成稳定、可读**:按 [§3.1](#31-命名规范-cam18-已定cam19-必须沿用) 的资源路径模式,如 `t1-writing-task1.jpg`、`t2-listening-p2-map.jpg`。
+4. **就位**:本地路径放 `public/images/{book}/`、`public/audio/{book}/`(cam18 现状);要走私有桶见 [§5](#5-图片存储supabase-storage)。
+5. **在 JSON 里填 URL**:unit 级填 `asset_url`,question 级填 `metadata.assetUrl`(路径模式同 §3.1)。
 
 ---
 
@@ -37,7 +37,7 @@
 
 ```jsonc
 {
-  "id": "cam18-test1-reading-p2",          // 全局唯一,kebab-case:{book}-test{n}-{skill}-{part}
+  "id": "cam18-test1-reading-p2",          // 全局唯一,见 §3.1 命名规范
   "slug": "reading-cam18-t1-forest-management", // 全局唯一,人类可读
   "skill": "reading",                       // foundation | reading | listening | writing | speaking
   "mode": "challenge",                      // basic | progressive | challenge(训练模式,≠难度)
@@ -59,9 +59,9 @@
 
 ```jsonc
 {
-  "id": "cam18-t1-r-p2-q1",                 // 全局唯一
+  "id": "cam18-t1-p2-q14",                  // 全局唯一,q 后是原卷题号(P2 接 P1),见 §3.1
   "unit_id": "cam18-test1-reading-p2",      // == 所属 unit.id
-  "question_number": 1,                      // 本 unit 内从 1 连续递增(不是原卷题号)
+  "question_number": 1,                      // 本 unit 内从 1 连续递增(≠ id 里的原卷题号)
   "question_type": "multiple_choice",        // 只有 6 种,见 §4
   "question_text": "What is the main purpose of ...?",
   "options": ["...", "...", "...", "..."],   // 选择类必填;填空/简答/主观填 null
@@ -78,6 +78,41 @@
   }
 }
 ```
+
+### 3.1 命名规范(★ cam18 已定,cam19+ 必须沿用)
+
+cam18 全 4 套题已按下表落地。**新书必须逐字沿用这套模式**,只把 `cam18`/`t1` 换成对应书号和 test 号,否则前端关联和一致性测试会对不上。
+
+**Unit `id`** — `{book}-test{n}-{skill}[-{part}]`(`part` 只有阅读/听力有):
+
+| skill | unit id 模式 | 示例 |
+|---|---|---|
+| reading | `{book}-test{n}-reading-p{1..3}` | `cam18-test1-reading-p2` |
+| listening | `{book}-test{n}-listening-p{1..4}` | `cam18-test1-listening-p2` |
+| writing | `{book}-test{n}-writing` | `cam18-test1-writing` |
+| speaking | `{book}-test{n}-speaking` | `cam18-test1-speaking` |
+
+**Question `id`** — `{book}-t{n}-{seg}-q{k}`。⚠️ **`k` 用的是原卷题号,不是 unit 内序号**:阅读 P2 接着 P1 往下编(P1 是 q1–q13,P2 就从 `-q14` 起),听力 L2 接着 L1(L1 q1–q10,L2 从 `-q11` 起)。而 JSON 里的 `question_number` 字段仍是**每个 unit 内从 1 重编**——两者不一样,别混。`seg` 段码按 skill 固定:
+
+| skill | seg 段码 | question id 示例(注意 q 后是原卷题号) |
+|---|---|---|
+| reading | `p1` / `p2` / `p3` | `cam18-t1-p1-q1`、`cam18-t1-p2-q14`、`cam18-t1-p3-q27` |
+| listening | `l1` / `l2` / `l3` / `l4` | `cam18-t1-l1-q1`、`cam18-t1-l2-q11`、`cam18-t1-l2-q15` |
+| writing | `writing` | `cam18-t1-writing-q1` |
+| speaking | `speaking` | `cam18-t1-speaking-q1` |
+
+> 两个「不同名」要记牢:(1) unit id 用全称 `test1`+`reading`,question id 用缩写 `t1`+段码 `p2`;(2) question id 的 `-q{k}` 是原卷连续题号,而 JSON `question_number` 字段是 unit 内从 1 重编。都是 cam18 既定事实,别去统一。
+
+**Slug** — 人类可读且全局唯一:`{skill}-{book}-t{n}-{topic-kebab}`,如 `reading-cam18-t1-forest-management`、`writing-cam18-t1-electricity-bar`。
+
+**资源文件路径** — 前端直接引用的本地路径(与 Storage 路径二选一,见 §5):
+
+| 类型 | 路径模式 | 示例 |
+|---|---|---|
+| 听力音频 | `/audio/{book}/t{n}-p{1..4}.mp3` | `/audio/cam18/t2-p1.mp3` |
+| 写作图表 | `/images/{book}/t{n}-writing-task1.jpg` | `/images/cam18/t1-writing-task1.jpg` |
+| 听力地图 | `/images/{book}/t{n}-listening-p{n}-map.jpg` | `/images/cam18/t2-listening-p2-map.jpg` |
+| 图表前后对比 | `/images/{book}/t{n}-writing-task1-{before,after}.jpg` | `/images/cam18/t3-writing-task1-before.jpg` |
 
 ---
 
@@ -107,13 +142,21 @@
 
 ---
 
-## 5. 图片存储(Supabase Storage）
+## 5. 图片 / 音频存储
 
-- **私有桶** `practice-assets`(不进 git、默认要登录才能取,版权暴露最小)。
-- 路径按 `book/test/name` 组织:`cam18/test1/writing-task1.png`。
-- `asset_url` / `metadata.assetUrl` 里存**该对象的路径或完整 URL**;前端显示时由 server 端换成带时效的 **signed URL**(`MaterialPane` 已经会渲染 `unit.asset_url`,填上就出图)。
-- **版权**:抠出来的 Cambridge 图**别 commit 进 `/public`、别放公开桶**;和现在 gitignore 掉 `/raw/` 的做法保持一致。
-- 给 AI 批改留路:写作 Task1 的图要能被取回喂给 vision 模型,所以存成可取的对象,别只做静态贴图。
+现在有两条路,cam18 走了 A,长期目标是 B。**cam19+ 先跟 cam18 保持一致(A),等版权方案定了再统一迁移。**
+
+**A. 本地 `public/`(cam18 现状,最省事)**
+- 文件放 `public/images/{book}/`、`public/audio/{book}/`;`asset_url` / `assetUrl` / `audio_url` 直接填 `/images/...`、`/audio/...`(见 §3.1 路径表)。
+- `MaterialPane` / `AnswerSheet` 拿到这种路径直接渲染,零额外配置。
+- ⚠️ **版权隐患**:Cambridge 原始音视频/图落在 `public/` 且**未 gitignore**,一旦 `git add` 就会公开提交。cam18 目前正是这个待处理状态。
+
+**B. Supabase 私有桶 `practice-assets`(版权安全,目标态)**
+- 文件传私有桶(不进 git、默认要登录才能取);`asset_url` / `assetUrl` 存**对象路径**(如 `cam18/t1-writing-task1.jpg`)。
+- 前端由 server 端换成带时效的 **signed URL** 再渲染(该解析钩子尚未落地)。
+- 和现在 gitignore 掉 `/raw/` 的做法一致。
+
+**通用**:抠出来的 Cambridge 图/音**别放公开桶**;给 AI 批改留路——写作 Task1 的图要能被取回喂给 vision 模型,所以存成可取的对象,别只做纯静态贴图。
 
 ---
 
@@ -129,7 +172,7 @@
   "asset_url": null, "time_limit_seconds": 1200, "metadata": { "source": "剑桥雅思18.pdf" },
   "questions": [
     {
-      "id": "cam18-t1-r-p1-q1", "unit_id": "cam18-test1-reading-p1", "question_number": 1,
+      "id": "cam18-t1-p1-q1", "unit_id": "cam18-test1-reading-p1", "question_number": 1,
       "question_type": "multiple_choice",
       "question_text": "What is the main purpose of the first paragraph?",
       "options": ["To describe the equipment on roofs", "To introduce a changing view of rooftops",
@@ -139,7 +182,7 @@
       "metadata": { "ieltsNumber": 1, "ieltsType": "multiple_choice" }
     },
     {
-      "id": "cam18-t1-r-p1-q2", "unit_id": "cam18-test1-reading-p1", "question_number": 2,
+      "id": "cam18-t1-p1-q2", "unit_id": "cam18-test1-reading-p1", "question_number": 2,
       "question_type": "true_false_not_given",
       "question_text": "Green roofs were first developed in Germany.",
       "options": ["True", "False", "Not Given"],
@@ -153,16 +196,16 @@
 ```jsonc
 // 写作 Task 1（带参考图表）
 {
-  "id": "cam18-test1-writing-t1", "slug": "writing-cam18-t1-electricity-bar",
+  "id": "cam18-test1-writing", "slug": "writing-cam18-t1-electricity-bar",
   "skill": "writing", "mode": "challenge", "title": "Cambridge 18 · Test 1 · Writing Task 1",
   "description": null, "difficulty": "hard", "material_type": "writing_prompt",
   "passage_text": null, "audio_url": null, "transcript": null,
-  "asset_url": "cam18/test1/writing-task1.png",   // ★ 图表,MaterialPane 会渲染
+  "asset_url": "/images/cam18/t1-writing-task1.jpg",   // ★ 图表,MaterialPane 会渲染
   "time_limit_seconds": 1200,
   "metadata": { "source": "剑桥雅思18.pdf", "taskType": "task_1", "wordTarget": 150,
                 "prompt": "The chart below shows ... Summarise the information ..." },
   "questions": [
-    { "id": "cam18-t1-w-t1-q1", "unit_id": "cam18-test1-writing-t1", "question_number": 1,
+    { "id": "cam18-t1-writing-q1", "unit_id": "cam18-test1-writing", "question_number": 1,
       "question_type": "writing_task",
       "question_text": "Summarise the information by selecting and reporting the main features.",
       "options": null, "answer_key": { "answers": [] }, "explanation": null,
@@ -214,7 +257,13 @@ Speaking → speaking_response。
 
 【元数据】metadata.source 填 PDF 名;每题 metadata.ieltsNumber 存原卷题号、metadata.ieltsType 存原始 IELTS 题型。
 
-【命名】id kebab-case 且全局唯一,如 cam18-test1-reading-p2 / cam18-t1-r-p2-q1;slug 人类可读且唯一。
+【命名】(必须逐字沿用 cam18 既定模式,只换书号/test 号)
+- unit id:{book}-test{n}-{skill}[-p{k}],如 cam18-test1-reading-p2 / cam18-test1-writing / cam18-test1-listening-p4。
+- question id:{book}-t{n}-{seg}-q{k},seg 段码:阅读 p1/p2/p3、听力 l1/l2/l3/l4、写作 writing、口语 speaking。
+  ⚠️ q{k} 用原卷连续题号(阅读 P2 接 P1:P1=q1–13 则 P2 从 q14;听力 L2 接 L1),而 JSON question_number 字段是 unit 内从 1 重编。
+  例:cam18-t1-p1-q1 / cam18-t1-p2-q14 / cam18-t1-l2-q11 / cam18-t1-writing-q1。unit id 用全称、question id 用缩写,别统一。
+- slug:{skill}-{book}-t{n}-{topic},如 reading-cam18-t1-forest-management。
+- 资源路径:图 /images/{book}/t{n}-writing-task1.jpg、/images/{book}/t{n}-listening-p{k}-map.jpg;音频 /audio/{book}/t{n}-p{k}.mp3。
 
 【自检】输出前确认:选择题每个 answer 都能在 options 里找到原文;question_number 从 1 连续;unit_id 一致;
 options 该 null 的为 null;主观题 answers 为 []。
