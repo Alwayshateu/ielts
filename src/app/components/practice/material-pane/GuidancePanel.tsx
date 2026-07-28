@@ -20,7 +20,7 @@ export function GuidancePanel({
       };
 
   return (
-    <div className={`mb-5 rounded-[1.5rem] border p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.78)] ${toneClass.panel}`}>
+    <div className={`mb-5 rounded-2xl border p-4 ${toneClass.panel}`}>
       <div className="grid grid-cols-3 gap-2">
         {items.map((item) => (
           <div key={item.label} className={`rounded-2xl border px-3 py-2 ${toneClass.chip}`}>

@@ -19,7 +19,7 @@ export function SpeakingTimerShell({
   onReset: () => void;
 }) {
   return (
-    <div className="mb-5 rounded-[1.5rem] border border-rose-200 bg-rose-50 p-4 text-rose-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.78)]">
+    <div className="mb-5 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-rose-950">
       <div className="flex items-start gap-3">
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-rose-700">
           <Timer size={20} weight="regular" />
@@ -47,7 +47,7 @@ export function SpeakingTimerShell({
 
 function TimerCard({ active, label, value }: { active: boolean; label: string; value: string }) {
   return (
-    <div className={`rounded-2xl border px-3 py-2 ${active ? 'border-rose-300 bg-white text-rose-900 shadow-sm' : 'border-rose-200 bg-white/70 text-rose-800/70'}`}>
+    <div className={`rounded-2xl border px-3 py-2 ${active ? 'border-rose-300 bg-white text-rose-900 shadow-sm' : 'border-rose-200 bg-white text-rose-800/70'}`}>
       <p className="text-[11px] font-semibold opacity-65">{label}</p>
       <p className="mt-1 text-2xl font-semibold tabular-nums">{value}</p>
     </div>

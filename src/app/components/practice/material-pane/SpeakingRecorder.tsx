@@ -117,7 +117,7 @@ export function SpeakingRecorder() {
     ratedValues.length > 0 ? Math.round((ratedValues.reduce((sum, value) => sum + value, 0) / ratedValues.length) * 10) / 10 : null;
 
   return (
-    <div className="mb-5 rounded-[1.5rem] border border-rose-200 bg-rose-50 p-4 text-rose-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.78)]">
+    <div className="mb-5 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-rose-950">
       <div className="flex items-start gap-3">
         <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-rose-700">
           <Microphone size={20} weight="regular" />

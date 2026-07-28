@@ -198,34 +198,31 @@ export default function MaterialPane({
 
   return (
     <aside className="lg:col-span-5">
-      <div className="sticky top-6 overflow-hidden rounded-[2rem] border border-line bg-surface shadow-[inset_0_1px_0_rgba(255,255,255,0.78),0_22px_58px_-38px_rgba(24,24,27,0.36)]">
-        <div className="relative overflow-hidden border-b border-line bg-ink p-6 text-white">
-          <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full bg-white/10 blur-3xl" aria-hidden="true" />
-          <div className="relative">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-xs font-semibold text-white/65">
-              <MaterialIcon size={14} weight="regular" />
-              {materialMeta.label}
-            </span>
-            <h1 className="text-display mt-5 text-3xl font-semibold">{unit.title}</h1>
-            <p className="mt-3 text-sm leading-relaxed text-white/60">{unit.description}</p>
-            <div className="mt-5 grid grid-cols-3 gap-2">
-              <MetaChip icon={BookOpenText} label="模式" value={unit.mode === 'progressive' ? 'Progressive' : unit.mode === 'challenge' ? 'Challenge' : 'Basic'} />
-              <MetaChip icon={FileText} label="难度" value={formatDifficulty(unit.difficulty)} />
-              <MetaChip icon={Clock} label="建议" value={formatMinutes(unit.time_limit_seconds)} />
-            </div>
-            <p className="mt-4 rounded-2xl border border-white/10 bg-white/[0.06] px-3 py-2 text-xs leading-relaxed text-white/55">
-              选中 {materialMeta.hintTarget} 文字后可以 highlight 或添加 note。当前标注
-              {highlightCount + noteCount} 条
-              {annotationSync?.enabled
-                ? annotationSyncCopy(annotationSync)
-                : '，只保存在本机浏览器，不会写入数据库。'}
-            </p>
+      <div className="sticky top-6 overflow-hidden rounded-2xl border border-line bg-surface">
+        <div className="border-b border-line bg-ink p-6 text-white">
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-xs font-semibold text-white/65">
+            <MaterialIcon size={14} weight="regular" />
+            {materialMeta.label}
+          </span>
+          <h1 className="text-tight mt-5 text-2xl font-semibold">{unit.title}</h1>
+          <p className="mt-3 text-sm leading-relaxed text-white/60">{unit.description}</p>
+          <div className="mt-5 grid grid-cols-3 gap-2">
+            <MetaChip icon={BookOpenText} label="模式" value={unit.mode === 'progressive' ? 'Progressive' : unit.mode === 'challenge' ? 'Challenge' : 'Basic'} />
+            <MetaChip icon={FileText} label="难度" value={formatDifficulty(unit.difficulty)} />
+            <MetaChip icon={Clock} label="建议" value={formatMinutes(unit.time_limit_seconds)} />
           </div>
+          <p className="mt-4 rounded-xl border border-white/10 bg-white/[0.06] px-3 py-2 text-xs leading-relaxed text-white/55">
+            选中 {materialMeta.hintTarget} 文字后可以 highlight 或添加 note。当前标注
+            {highlightCount + noteCount} 条
+            {annotationSync?.enabled
+              ? annotationSyncCopy(annotationSync)
+              : '，只保存在本机浏览器，不会写入数据库。'}
+          </p>
         </div>
 
         <div className="max-h-[68dvh] overflow-y-auto px-5 py-6 sm:px-6" onScroll={() => setPendingSelection(null)}>
           {materialMeta.emptyLabel && materialMeta.emptyDescription && (
-            <div className={`mb-5 rounded-[1.5rem] border p-4 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.78)] ${
+            <div className={`mb-5 rounded-2xl border p-4 text-sm ${
               materialMeta.tone === 'sky'
                 ? 'border-sky-200 bg-sky-50 text-sky-900'
                 : materialMeta.tone === 'amber'
@@ -233,7 +230,7 @@ export default function MaterialPane({
                   : 'border-rose-200 bg-rose-50 text-rose-900'
             }`}>
               <div className="flex items-start gap-3">
-                <span className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-white ${
+                <span className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white ${
                   materialMeta.tone === 'sky' ? 'text-sky-700' : materialMeta.tone === 'amber' ? 'text-amber-700' : 'text-rose-700'
                 }`}>
                   <MaterialIcon size={18} weight="regular" />
@@ -297,7 +294,7 @@ export default function MaterialPane({
           )}
 
           {assetUrl && (
-            <figure className="mb-5 overflow-hidden rounded-[1.5rem] border border-line bg-white">
+            <figure className="mb-5 overflow-hidden rounded-2xl border border-line bg-white">
               {/* Signed Storage URLs are external and time-limited, so the next/image optimizer is a poor fit — render directly. */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={assetUrl} alt={`${unit.title} 参考图`} className="w-full object-contain" />
@@ -324,7 +321,7 @@ export default function MaterialPane({
           </div>
 
           {annotations.length > 0 && (
-            <div className="mt-6 rounded-[1.5rem] border border-line bg-zinc-50 p-4">
+            <div className="mt-6 rounded-2xl border border-line bg-zinc-50 p-4">
               <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <p className="text-sm font-semibold text-ink">本地 {materialMeta.annotationTitle}</p>
@@ -378,7 +375,7 @@ export default function MaterialPane({
 
       {editingAnnotation && (
         <div className="fixed inset-0 z-20 flex items-end bg-zinc-950/18 px-4 py-6 backdrop-blur-[2px] sm:items-center sm:justify-center" data-annotation-menu>
-          <div className="w-full max-w-md rounded-[1.75rem] border border-line bg-surface p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.82),0_30px_80px_-40px_rgba(24,24,27,0.42)]">
+          <div className="w-full max-w-md rounded-2xl border border-line bg-surface p-5 shadow-[0_30px_80px_-40px_rgba(24,24,27,0.42)]">
             <p className="text-sm font-semibold text-ink">编辑 {materialMeta.hintTarget} Note</p>
             <p className="mt-2 line-clamp-3 rounded-2xl bg-zinc-50 px-3 py-2 text-xs leading-relaxed text-ink-subtle">
               “{editingAnnotation.text}”
@@ -431,7 +428,7 @@ export default function MaterialPane({
       {pendingSelection && (
         <div
           data-annotation-menu
-          className="fixed z-20 w-72 rounded-[1.25rem] border border-line bg-surface p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.82),0_24px_60px_-34px_rgba(24,24,27,0.38)]"
+          className="fixed z-20 w-72 rounded-2xl border border-line bg-surface p-3 shadow-[0_24px_60px_-34px_rgba(24,24,27,0.38)]"
           style={{ left: Math.min(pendingSelection.x, window.innerWidth - 304), top: Math.min(pendingSelection.y, window.innerHeight - 230) }}
         >
           <p className="line-clamp-2 text-xs leading-relaxed text-ink-subtle">“{pendingSelection.text}”</p>
@@ -442,14 +439,14 @@ export default function MaterialPane({
               <button
                 type="button"
                 onClick={() => createAnnotation('highlight', null)}
-                className="rounded-2xl bg-amber-100 px-3 py-2 text-left text-sm font-semibold text-amber-800 transition-all hover:-translate-y-0.5 hover:bg-amber-200 active:scale-[0.98]"
+                className="rounded-xl bg-amber-100 px-3 py-2 text-left text-sm font-semibold text-amber-800 transition-colors hover:bg-amber-200 active:scale-[0.98]"
               >
                 Highlight 这段文字
               </button>
               <button
                 type="button"
                 onClick={() => setMenuMode('note')}
-                className="rounded-2xl border border-line bg-zinc-50 px-3 py-2 text-left text-sm font-semibold text-ink-muted transition-all hover:-translate-y-0.5 hover:border-accent/30 hover:bg-accent-tint hover:text-accent active:scale-[0.98]"
+                className="rounded-xl border border-line bg-zinc-50 px-3 py-2 text-left text-sm font-semibold text-ink-muted transition-colors hover:border-accent/30 hover:bg-accent-tint hover:text-accent active:scale-[0.98]"
               >
                 添加 Note
               </button>

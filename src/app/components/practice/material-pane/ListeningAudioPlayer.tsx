@@ -90,14 +90,14 @@ export function ListeningAudioPlayer({
 
   if (!audioUrl) {
     return (
-      <div className="mb-5 rounded-[1.5rem] border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900">
+      <div className="mb-5 rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900">
         当前单元还没有 audio_url，接入后这里会出现可播放的 Listening section。
       </div>
     );
   }
 
   return (
-    <div className="mb-5 rounded-[1.5rem] border border-sky-200 bg-sky-50 p-4 text-sky-950 shadow-[inset_0_1px_0_rgba(255,255,255,0.78)]">
+    <div className="mb-5 rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sky-950">
       <audio
         ref={audioRef}
         src={audioUrl}
@@ -185,7 +185,7 @@ export function ListeningAudioPlayer({
           </div>
 
           {playbackLocked && (
-            <p className="mt-2 flex items-center gap-1.5 rounded-xl bg-white/70 px-3 py-2 text-[11px] font-semibold text-sky-800">
+            <p className="mt-2 flex items-center gap-1.5 rounded-xl bg-white px-3 py-2 text-[11px] font-semibold text-sky-800">
               <LockSimple size={13} weight="fill" />
               「仅播一次」已锁定：模拟真实考试，音频只播放一遍，无法重听或拖动。
             </p>
