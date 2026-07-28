@@ -37,7 +37,7 @@ import { PRACTICE_HISTORY_HREF, PRACTICE_SESSIONS_HREF } from '@/lib/practice-se
 import { formatDifficulty } from '@/lib/question-labels';
 import { formatClock } from '@/lib/practice-clock';
 import type { PracticeQuestionType, PracticeSkill } from '@/lib/types';
-import { riseChild, springSnap, staggerParent } from '../ui/motion-presets';
+import { riseChild, staggerParent } from '../ui/motion-presets';
 import { deltaTone, formatSignedPercent, formatSignedSeconds } from './attempt-delta';
 
 const SKILL_TONES: Record<PracticeSkill, { Icon: typeof BookOpenText; label: string; badge: string }> = {
@@ -120,7 +120,7 @@ function AttemptMissing() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
       <BackLink />
-      <div className="rounded-[1.75rem] border border-dashed border-line bg-surface/70 p-10 text-center">
+      <div className="rounded-2xl border border-dashed border-line bg-canvas p-10 text-center">
         <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-accent-tint text-accent">
           <Clock size={26} weight="regular" />
         </span>
@@ -130,7 +130,7 @@ function AttemptMissing() {
         </p>
         <Link
           href={PRACTICE_HISTORY_HREF}
-          className="mt-6 inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 active:scale-[0.98]"
+          className="mt-6 inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 active:scale-[0.98]"
         >
           回到 Session History
           <ArrowRight size={16} weight="bold" />
@@ -189,7 +189,7 @@ function AttemptDetail({
               </span>
             )}
           </div>
-          <h1 className="text-display mt-4 max-w-3xl text-3xl font-semibold text-ink sm:text-4xl">{attempt.title}</h1>
+          <h1 className="text-tight mt-4 max-w-3xl text-3xl font-semibold text-ink sm:text-4xl">{attempt.title}</h1>
           <p className="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-sm text-ink-subtle">
             <span>{formatStamp(attempt.recordedAt)}</span>
             <span>·</span>
@@ -248,7 +248,7 @@ function AttemptDetail({
         {answers.length === 0 ? (
           <motion.section
             variants={riseChild}
-            className="mt-5 rounded-[1.5rem] border border-dashed border-line bg-surface/70 p-7 text-center"
+            className="mt-5 rounded-2xl border border-dashed border-line bg-canvas p-7 text-center"
           >
             <h2 className="text-base font-semibold text-ink">这次记录没有逐题快照</h2>
             <p className="mx-auto mt-2 max-w-lg text-sm leading-relaxed text-ink-subtle">
@@ -256,7 +256,7 @@ function AttemptDetail({
             </p>
             <Link
               href={sessionHref}
-              className="mt-5 inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 active:scale-[0.98]"
+              className="mt-5 inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 active:scale-[0.98]"
             >
               重练这组 Session
               <ArrowRight size={16} weight="bold" />
@@ -278,14 +278,14 @@ function AttemptDetail({
         <motion.footer variants={riseChild} className="mt-6 flex flex-wrap gap-2.5">
           <Link
             href={sessionHref}
-            className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 active:scale-[0.98]"
+            className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 active:scale-[0.98]"
           >
             <ArrowUUpLeft size={16} weight="bold" />
             重练这组 Session
           </Link>
           <Link
             href={PRACTICE_SESSIONS_HREF}
-            className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-5 py-2.5 text-sm font-semibold text-ink-muted transition-all hover:-translate-y-0.5 hover:border-zinc-300 hover:text-ink active:scale-[0.98]"
+            className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-5 py-2.5 text-sm font-semibold text-ink-muted transition-colors hover:border-zinc-300 hover:text-ink active:scale-[0.98]"
           >
             换一组练
             <ArrowRight size={16} weight="bold" />
@@ -317,9 +317,7 @@ function StatTile({
   return (
     <motion.div
       variants={riseChild}
-      whileHover={{ y: -2 }}
-      transition={springSnap}
-      className="rounded-2xl border border-line bg-surface p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]"
+      className="rounded-2xl border border-line bg-surface p-4"
     >
       <p className="text-xs font-medium text-ink-muted">{label}</p>
       <p className="mt-2 text-2xl font-semibold text-ink">{value}</p>
@@ -337,7 +335,7 @@ function BackLink() {
   return (
     <Link
       href={PRACTICE_HISTORY_HREF}
-      className="mb-5 flex w-fit items-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium text-ink-muted transition-all hover:-translate-y-0.5 hover:border-zinc-300 hover:text-ink active:scale-[0.98]"
+      className="mb-5 flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium text-ink-muted transition-colors hover:bg-zinc-100 hover:text-ink active:scale-[0.98]"
     >
       <ArrowLeft size={17} weight="bold" />
       返回 Session History
@@ -380,7 +378,7 @@ function QuestionReview({
                 type="button"
                 onClick={() => onFilterChange(item.value)}
                 aria-pressed={active}
-                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-all active:scale-[0.98] ${
+                className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors active:scale-[0.98] ${
                   active
                     ? 'bg-ink text-white'
                     : 'border border-line bg-surface text-ink-muted hover:border-zinc-300 hover:text-ink'
@@ -394,7 +392,7 @@ function QuestionReview({
       </div>
 
       {answers.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-line bg-surface/70 p-6 text-center text-sm text-ink-subtle">
+        <p className="rounded-2xl border border-dashed border-line bg-canvas p-6 text-center text-sm text-ink-subtle">
           这个筛选下没有题目。
         </p>
       ) : (
@@ -416,7 +414,7 @@ function AnswerRow({ answer }: { answer: PracticeAttemptAnswer }) {
   return (
     <motion.article
       variants={riseChild}
-      className={`rounded-2xl border bg-surface p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] ${tone.card}`}
+      className={`rounded-2xl border bg-surface p-4 ${tone.card}`}
     >
       <div className="flex items-start gap-3">
         <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-xs font-semibold ${tone.badge}`}>
@@ -442,7 +440,7 @@ function AnswerRow({ answer }: { answer: PracticeAttemptAnswer }) {
               </dd>
             </div>
             {showCorrect && (
-              <div className="rounded-xl bg-emerald-50/70 px-3 py-2">
+              <div className="rounded-xl bg-emerald-50 px-3 py-2">
                 <dt className="text-[10px] font-semibold uppercase tracking-wide text-emerald-700">参考答案</dt>
                 <dd className="mt-0.5 break-words text-sm text-emerald-800">{answer.correctAnswer}</dd>
               </div>
@@ -465,7 +463,7 @@ function RetryPanel({
     return (
       <motion.section
         variants={riseChild}
-        className="mt-5 flex flex-wrap items-center gap-3 rounded-[1.5rem] border border-emerald-100 bg-emerald-50/60 p-5"
+        className="mt-5 flex flex-wrap items-center gap-3 rounded-2xl border border-emerald-100 bg-emerald-50 p-5"
       >
         <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
           <SealCheck size={20} weight="fill" />
@@ -481,7 +479,7 @@ function RetryPanel({
   return (
     <motion.section
       variants={riseChild}
-      className="mt-5 rounded-[1.5rem] border border-line bg-surface p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.78),0_14px_38px_-34px_rgba(24,24,27,0.34)]"
+      className="mt-5 rounded-2xl border border-line bg-surface p-5"
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
@@ -492,7 +490,7 @@ function RetryPanel({
         </div>
         <Link
           href={sessionHref}
-          className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3.5 py-1.5 text-xs font-semibold text-ink-muted transition-all hover:-translate-y-0.5 hover:border-zinc-300 hover:text-ink active:scale-[0.98]"
+          className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3.5 py-1.5 text-xs font-semibold text-ink-muted transition-colors hover:border-zinc-300 hover:text-ink active:scale-[0.98]"
         >
           回到 Session
           <ArrowRight size={13} weight="bold" />

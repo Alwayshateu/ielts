@@ -38,7 +38,7 @@ import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
 import { practiceAttemptDetailHref, PRACTICE_SESSIONS_HREF } from '@/lib/practice-session-links';
 import { formatClock } from '@/lib/practice-clock';
 import type { PracticeSkill } from '@/lib/types';
-import { riseChild, springSnap, staggerParent } from '../ui/motion-presets';
+import { riseChild, staggerParent } from '../ui/motion-presets';
 import { dayKey, formatDayLabel, formatDuration, formatTime } from './history-format';
 
 const SKILL_TONES: Record<PracticeSkill, { Icon: typeof BookOpenText; label: string; badge: string; bar: string }> = {
@@ -124,7 +124,7 @@ export default function PracticeHistoryView() {
         <motion.header variants={riseChild} className="mb-7">
           <Link
             href={PRACTICE_SESSIONS_HREF}
-            className="mb-5 flex w-fit items-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium text-ink-muted transition-all hover:-translate-y-0.5 hover:border-zinc-300 hover:text-ink active:scale-[0.98]"
+            className="mb-5 flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium text-ink-muted transition-colors hover:bg-zinc-100 hover:text-ink active:scale-[0.98]"
           >
             <ArrowLeft size={17} weight="bold" />
             返回 Session Library
@@ -133,7 +133,7 @@ export default function PracticeHistoryView() {
             <ChartLineUp size={14} weight="regular" />
             Session History · {syncEnabled ? '本地 + 云端' : '本地'}
           </span>
-          <h1 className="text-display mt-4 max-w-3xl text-4xl font-semibold text-ink sm:text-5xl">
+          <h1 className="text-tight mt-4 max-w-3xl text-3xl font-semibold text-ink sm:text-4xl">
             你的 Session 复盘轨迹
           </h1>
           <p className="mt-4 max-w-2xl text-sm leading-relaxed text-ink-subtle">
@@ -147,7 +147,7 @@ export default function PracticeHistoryView() {
         {entries.length === 0 ? (
           <motion.div
             variants={riseChild}
-            className="rounded-[1.75rem] border border-dashed border-line bg-surface/70 p-10 text-center"
+            className="rounded-2xl border border-dashed border-line bg-canvas p-10 text-center"
           >
             <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-accent-tint text-accent">
               <ChartLineUp size={26} weight="regular" />
@@ -158,7 +158,7 @@ export default function PracticeHistoryView() {
             </p>
             <Link
               href={PRACTICE_SESSIONS_HREF}
-              className="mt-6 inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 active:scale-[0.98]"
+              className="mt-6 inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 active:scale-[0.98]"
             >
               去 Session Library
               <ArrowRight size={16} weight="bold" />
@@ -201,7 +201,7 @@ export default function PracticeHistoryView() {
             {objectiveTrend.length >= 2 && (
               <motion.section
                 variants={riseChild}
-                className="mt-4 rounded-[1.5rem] border border-line bg-surface p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.78),0_14px_38px_-34px_rgba(24,24,27,0.34)]"
+                className="mt-4 rounded-2xl border border-line bg-surface p-5"
               >
                 <div className="mb-4 flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -242,7 +242,7 @@ export default function PracticeHistoryView() {
                   return (
                     <div
                       key={stat.skill}
-                      className="rounded-2xl border border-line bg-surface p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]"
+                      className="rounded-2xl border border-line bg-surface p-4"
                     >
                       <div className="flex items-center justify-between">
                         <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${tone.badge}`}>
@@ -270,7 +270,7 @@ export default function PracticeHistoryView() {
                       type="button"
                       onClick={handleSync}
                       disabled={syncState.status === 'syncing'}
-                      className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3.5 py-1.5 text-xs font-semibold text-ink-muted transition-all hover:border-zinc-300 hover:text-ink active:scale-[0.98] disabled:opacity-60"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3.5 py-1.5 text-xs font-semibold text-ink-muted transition-colors hover:border-zinc-300 hover:text-ink active:scale-[0.98] disabled:opacity-60"
                     >
                       <CloudArrowUp size={13} weight="regular" />
                       {syncState.status === 'syncing' ? '同步中…' : '同步到云端'}
@@ -279,7 +279,7 @@ export default function PracticeHistoryView() {
                   <button
                     type="button"
                     onClick={handleClear}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3.5 py-1.5 text-xs font-semibold text-ink-muted transition-all hover:border-rose-200 hover:text-rose-600 active:scale-[0.98]"
+                    className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3.5 py-1.5 text-xs font-semibold text-ink-muted transition-colors hover:border-rose-200 hover:text-rose-600 active:scale-[0.98]"
                   >
                     <Trash size={13} weight="regular" />
                     清空记录
@@ -331,9 +331,7 @@ function SummaryTile({
   return (
     <motion.div
       variants={riseChild}
-      whileHover={{ y: -2 }}
-      transition={springSnap}
-      className="rounded-2xl border border-line bg-surface p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]"
+      className="rounded-2xl border border-line bg-surface p-4"
     >
       <p className="text-xs font-medium text-ink-muted">{label}</p>
       <p className="mt-2 text-2xl font-semibold text-ink">{value}</p>
@@ -350,7 +348,7 @@ function SummaryTile({
 function SyncBanner({ state }: { state: SyncState }) {
   if (state.status === 'error') {
     return (
-      <div className="mb-4 flex items-start gap-2.5 rounded-2xl border border-rose-100 bg-rose-50/70 p-4">
+      <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-rose-100 bg-rose-50 p-4">
         <WarningCircle size={17} weight="fill" className="mt-0.5 shrink-0 text-rose-600" />
         <div className="min-w-0">
           <p className="text-sm font-semibold text-rose-900">同步失败</p>
@@ -368,8 +366,8 @@ function SyncBanner({ state }: { state: SyncState }) {
 
   return (
     <div
-      className={`mb-4 flex items-start gap-2.5 rounded-2xl border p-4 ${
-        failed ? 'border-amber-100 bg-amber-50/70' : 'border-emerald-100 bg-emerald-50/60'
+      className={`mb-4 flex items-start gap-2.5 rounded-xl border p-4 ${
+        failed ? 'border-amber-100 bg-amber-50' : 'border-emerald-100 bg-emerald-50'
       }`}
     >
       {failed ? (
@@ -404,7 +402,7 @@ function HistoryRow({ entry }: { entry: PracticeSessionHistoryEntry }) {
   return (
     <Link
       href={practiceAttemptDetailHref(entry.id)}
-      className="group flex items-center gap-4 rounded-2xl border border-line bg-surface p-4 transition-all hover:-translate-y-0.5 hover:border-zinc-300 active:scale-[0.99]"
+      className="group flex items-center gap-4 rounded-2xl border border-line bg-surface p-4 transition-colors hover:border-zinc-300 active:scale-[0.99]"
     >
       <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${tone.badge}`}>
         <ToneIcon size={20} weight="regular" />

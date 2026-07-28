@@ -70,10 +70,10 @@ export default function ResultInspector({
     : '完成本地检查后，这里会生成本机 Review Report 和复盘队列。';
 
   return (
-    <div className="overflow-hidden rounded-[1.5rem] border border-line bg-ink text-white shadow-[0_22px_58px_-38px_rgba(24,24,27,0.85)]">
+    <div className="overflow-hidden rounded-2xl border border-line bg-ink text-white shadow-sm">
       <div className="p-5">
         <div className="flex items-start gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-white">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white">
             <Eye size={20} weight="regular" />
           </span>
           <div>
@@ -160,7 +160,7 @@ export default function ResultInspector({
             type="button"
             onClick={showResults ? onEditAnswers : onReveal}
             disabled={!canReveal && !showResults}
-            className="flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-ink transition-all hover:-translate-y-0.5 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-white/12 disabled:text-white/35 disabled:hover:translate-y-0"
+            className="flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-ink transition-colors hover:bg-white/90 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-white/12 disabled:text-white/35"
           >
             {showResults ? <PencilSimpleLine size={17} weight="bold" /> : <CheckCircle size={17} weight="bold" />}
             {showResults ? '编辑答案' : '生成本地 Report'}
@@ -168,7 +168,7 @@ export default function ResultInspector({
           <button
             type="button"
             onClick={showResults ? onReveal : onReset}
-            className="flex items-center justify-center gap-2 rounded-2xl border border-white/12 px-4 py-3 text-sm font-semibold text-white/75 transition-all hover:-translate-y-0.5 hover:bg-white/10 active:scale-[0.98]"
+            className="flex items-center justify-center gap-2 rounded-xl border border-white/12 px-4 py-3 text-sm font-semibold text-white/75 transition-colors hover:bg-white/10 active:scale-[0.98]"
           >
             <ArrowCounterClockwise size={17} weight="bold" />
             {showResults ? '重新检查' : '清空重做'}
@@ -178,7 +178,7 @@ export default function ResultInspector({
         {showResults && (
           <Link
             href="/practice/sessions"
-            className="mt-3 flex items-center justify-center gap-2 rounded-2xl border border-white/12 px-4 py-3 text-sm font-semibold text-white/75 transition-all hover:-translate-y-0.5 hover:bg-white/10 active:scale-[0.98]"
+            className="mt-3 flex items-center justify-center gap-2 rounded-xl border border-white/12 px-4 py-3 text-sm font-semibold text-white/75 transition-colors hover:bg-white/10 active:scale-[0.98]"
           >
             返回 Session Library
             <ArrowRight size={16} weight="bold" />
@@ -188,7 +188,7 @@ export default function ResultInspector({
         <button
           type="button"
           onClick={onClearLocalData}
-          className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl border border-red-200/20 bg-red-200/10 px-4 py-3 text-sm font-semibold text-red-100 transition-all hover:-translate-y-0.5 hover:bg-red-200/15 active:scale-[0.98]"
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-red-200/20 bg-red-200/10 px-4 py-3 text-sm font-semibold text-red-100 transition-colors hover:bg-red-200/15 active:scale-[0.98]"
         >
           清空本地 Session 数据
         </button>
@@ -214,7 +214,7 @@ export default function ResultInspector({
                     key={question.id}
                     type="button"
                     onClick={() => onSelectQuestion(question.id)}
-                    className="w-full rounded-2xl border border-white/10 bg-white/[0.06] p-3 text-left transition-all hover:-translate-y-0.5 hover:bg-white/[0.09] active:scale-[0.99]"
+                    className="w-full rounded-2xl border border-white/10 bg-white/[0.06] p-3 text-left transition-colors hover:bg-white/[0.09] active:scale-[0.99]"
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <span className="text-sm font-semibold text-white">Question {question.question_number}</span>
