@@ -170,14 +170,12 @@ export default function LoginPage() {
       </div>
 
       {/* Form panel */}
-      <div className="relative flex items-center justify-center overflow-hidden px-6 py-16 sm:px-12">
-        <div className="pointer-events-none absolute -right-24 top-12 h-72 w-72 rounded-full bg-accent/12 blur-3xl" aria-hidden="true" />
-        <div className="pointer-events-none absolute -bottom-28 left-10 h-72 w-72 rounded-full bg-accent-tint/70 blur-3xl" aria-hidden="true" />
+      <div className="relative flex items-center justify-center px-6 py-16 sm:px-12">
         <motion.div
           variants={staggerParent(0.07)}
           initial="hidden"
           animate="show"
-          className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-line bg-surface/90 p-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.75),0_28px_70px_-44px_rgba(24,24,27,0.42)] sm:p-8"
+          className="relative w-full max-w-md rounded-2xl border border-line bg-surface p-6 sm:p-8"
         >
           <motion.div
             variants={riseChild}
@@ -207,7 +205,7 @@ export default function LoginPage() {
               onClick={handleAnonymousLogin}
               disabled={loadingAnonymous || loadingEmail}
               strength={6}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-ink px-4 py-3.5 text-sm font-semibold text-white shadow-[0_18px_38px_-28px_rgba(24,24,27,0.85)] transition-all hover:-translate-y-0.5 hover:bg-zinc-800 hover:shadow-[0_24px_52px_-30px_rgba(24,24,27,0.9)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-ink px-4 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loadingAnonymous ? (
                 <CircleNotch size={18} weight="bold" className="animate-spin" />
@@ -254,7 +252,7 @@ export default function LoginPage() {
               type="submit"
               disabled={loadingEmail || loadingAnonymous}
               strength={6}
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-accent px-4 py-3.5 text-sm font-semibold text-white shadow-[0_18px_38px_-28px_rgba(79,70,229,0.75)] transition-all hover:-translate-y-0.5 hover:bg-accent-strong hover:shadow-[0_24px_52px_-30px_rgba(79,70,229,0.85)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-accent px-4 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-accent-strong active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {loadingEmail ? (
                 <CircleNotch size={18} weight="bold" className="animate-spin" />
@@ -277,7 +275,7 @@ export default function LoginPage() {
                 exit={{ opacity: 0, y: -8 }}
                 transition={springSnap}
                 role="status"
-                className={`mt-6 flex items-start gap-3 rounded-2xl border p-4 text-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.75)] ${
+                className={`mt-6 flex items-start gap-3 rounded-xl border p-4 text-sm ${
                   message.type === 'success'
                     ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
                     : 'border-red-200 bg-red-50 text-red-700'
