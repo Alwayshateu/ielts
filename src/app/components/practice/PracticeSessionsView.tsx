@@ -212,7 +212,7 @@ export default function PracticeSessionsView({ units }: { units: PracticeUnit[] 
                     <Link
                       key={unit.id}
                       href={`/practice/session/${unit.slug}`}
-                      className="rounded-xl border border-line bg-zinc-50 p-3 transition-colors hover:border-zinc-300 hover:bg-surface active:scale-[0.99]"
+                      className="rounded-xl border border-line bg-zinc-50 p-3 transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-300 hover:bg-surface active:scale-[0.99]"
                     >
                       <div className="flex items-center gap-2">
                         <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${tone.badge}`}>
@@ -275,7 +275,7 @@ export default function PracticeSessionsView({ units }: { units: PracticeUnit[] 
                 </div>
                 <Link
                   href={`/practice/session/${featuredUnit.slug}`}
-                  className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 active:scale-[0.98]"
+                  className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-5 py-3 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-zinc-800 active:scale-[0.98]"
                 >
                   {featuredDraftSummary?.ctaLabel ?? '进入 Session'}
                   <ArrowRight size={16} weight="bold" />
@@ -324,7 +324,7 @@ export default function PracticeSessionsView({ units }: { units: PracticeUnit[] 
                 <Link
                   key={unit.id}
                   href={`/practice/session/${unit.slug}`}
-                  className={`group rounded-2xl border bg-surface p-5 transition-colors hover:border-zinc-300 active:scale-[0.99] ${tone.border} ${tone.hover}`}
+                  className={`group rounded-2xl border bg-surface p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-300 active:scale-[0.99] ${tone.border} ${tone.hover}`}
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div>

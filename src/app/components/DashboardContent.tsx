@@ -241,7 +241,7 @@ export default function DashboardContent({
             </div>
             <Link
               href={recommendation.href}
-              className="flex w-fit shrink-0 items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-ink transition-colors hover:bg-zinc-100 active:scale-[0.98]"
+              className="flex w-fit shrink-0 items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-ink transition-all duration-200 hover:-translate-y-0.5 hover:bg-zinc-100 active:scale-[0.98]"
             >
               {recommendation.label}
               <ArrowRight size={16} weight="bold" />
@@ -272,7 +272,7 @@ export default function DashboardContent({
         <motion.div variants={riseChild} initial="hidden" animate="show">
           <Link
             href={PRACTICE_HISTORY_HREF}
-            className="group mt-4 flex items-center justify-between gap-4 rounded-2xl border border-line bg-surface px-5 py-4 transition-colors hover:border-accent/30 active:scale-[0.99]"
+            className="group mt-4 flex items-center justify-between gap-4 rounded-2xl border border-line bg-surface px-5 py-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/30 active:scale-[0.99]"
           >
             <div className="flex min-w-0 items-center gap-3">
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-accent-tint text-accent">
@@ -352,6 +352,7 @@ export default function DashboardContent({
                 key={cat.id}
                 variants={riseChild}
                 onClick={() => handleStartPractice(cat.id)}
+                whileHover={{ y: -4, scale: 1.01 }}
                 whileTap={{ scale: 0.98 }}
                 transition={springSnap}
                 className={`group relative flex min-h-40 flex-col justify-between overflow-hidden rounded-2xl p-5 text-left transition-colors ${

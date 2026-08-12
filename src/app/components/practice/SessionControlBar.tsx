@@ -163,7 +163,7 @@ export default function SessionControlBar({
             type="button"
             onClick={primaryAction}
             disabled={!canUsePrimary}
-            className="flex items-center justify-center gap-2 rounded-xl bg-ink px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-zinc-300 disabled:text-zinc-500"
+            className="flex items-center justify-center gap-2 rounded-xl bg-ink px-4 py-3 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-zinc-800 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-zinc-300 disabled:text-zinc-500 disabled:hover:translate-y-0"
           >
             <CheckCircle size={17} weight="bold" />
             {primaryLabel}
@@ -172,7 +172,7 @@ export default function SessionControlBar({
             <button
               type="button"
               onClick={onExitExam}
-              className="flex items-center justify-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700 transition-colors hover:border-amber-300 active:scale-[0.98]"
+              className="flex items-center justify-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-700 transition-all duration-200 hover:-translate-y-0.5 hover:border-amber-300 active:scale-[0.98]"
             >
               <XCircle size={17} weight="bold" />
               退出限时
@@ -182,7 +182,7 @@ export default function SessionControlBar({
               type="button"
               onClick={onStartExam}
               disabled={showResults}
-              className="flex items-center justify-center gap-2 rounded-xl border border-line bg-surface px-4 py-3 text-sm font-semibold text-ink-muted transition-colors hover:border-zinc-300 hover:text-ink active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex items-center justify-center gap-2 rounded-xl border border-line bg-surface px-4 py-3 text-sm font-semibold text-ink-muted transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-300 hover:text-ink active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
             >
               <Timer size={17} weight="bold" />
               开始限时
@@ -191,7 +191,7 @@ export default function SessionControlBar({
           <button
             type="button"
             onClick={onReset}
-            className="flex items-center justify-center gap-2 rounded-xl border border-line bg-surface px-4 py-3 text-sm font-semibold text-ink-muted transition-colors hover:border-zinc-300 hover:text-ink active:scale-[0.98]"
+            className="flex items-center justify-center gap-2 rounded-xl border border-line bg-surface px-4 py-3 text-sm font-semibold text-ink-muted transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-300 hover:text-ink active:scale-[0.98]"
           >
             <ArrowCounterClockwise size={17} weight="bold" />
             重做答题

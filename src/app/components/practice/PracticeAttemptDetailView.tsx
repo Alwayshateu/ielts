@@ -130,7 +130,7 @@ function AttemptMissing() {
         </p>
         <Link
           href={PRACTICE_HISTORY_HREF}
-          className="mt-6 inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 active:scale-[0.98]"
+          className="mt-6 inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-zinc-800 active:scale-[0.98]"
         >
           回到 Session History
           <ArrowRight size={16} weight="bold" />
@@ -256,7 +256,7 @@ function AttemptDetail({
             </p>
             <Link
               href={sessionHref}
-              className="mt-5 inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 active:scale-[0.98]"
+              className="mt-5 inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-zinc-800 active:scale-[0.98]"
             >
               重练这组 Session
               <ArrowRight size={16} weight="bold" />
@@ -278,14 +278,14 @@ function AttemptDetail({
         <motion.footer variants={riseChild} className="mt-6 flex flex-wrap gap-2.5">
           <Link
             href={sessionHref}
-            className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 active:scale-[0.98]"
+            className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-zinc-800 active:scale-[0.98]"
           >
             <ArrowUUpLeft size={16} weight="bold" />
             重练这组 Session
           </Link>
           <Link
             href={PRACTICE_SESSIONS_HREF}
-            className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-5 py-2.5 text-sm font-semibold text-ink-muted transition-colors hover:border-zinc-300 hover:text-ink active:scale-[0.98]"
+            className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-5 py-2.5 text-sm font-semibold text-ink-muted transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-300 hover:text-ink active:scale-[0.98]"
           >
             换一组练
             <ArrowRight size={16} weight="bold" />

@@ -158,7 +158,7 @@ export default function PracticeHistoryView() {
             </p>
             <Link
               href={PRACTICE_SESSIONS_HREF}
-              className="mt-6 inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 active:scale-[0.98]"
+              className="mt-6 inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-zinc-800 active:scale-[0.98]"
             >
               去 Session Library
               <ArrowRight size={16} weight="bold" />
@@ -402,7 +402,7 @@ function HistoryRow({ entry }: { entry: PracticeSessionHistoryEntry }) {
   return (
     <Link
       href={practiceAttemptDetailHref(entry.id)}
-      className="group flex items-center gap-4 rounded-2xl border border-line bg-surface p-4 transition-colors hover:border-zinc-300 active:scale-[0.99]"
+      className="group flex items-center gap-4 rounded-2xl border border-line bg-surface p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-300 active:scale-[0.99]"
     >
       <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${tone.badge}`}>
         <ToneIcon size={20} weight="regular" />

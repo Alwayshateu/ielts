@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { motion } from 'motion/react';
 import {
   ArrowCounterClockwise,
   ArrowRight,
@@ -13,6 +14,7 @@ import {
 } from '@phosphor-icons/react';
 import { buildPracticeReviewReport, type PracticeReviewTone } from '@/lib/practice-session-report';
 import type { PracticeQuestion } from '@/lib/types';
+import { riseChild, springSnap, staggerParent } from '../ui/motion-presets';
 import WrongBookSync from './WrongBookSync';
 
 function queueToneClass(tone: PracticeReviewTone) {
@@ -120,9 +122,11 @@ export default function ResultInspector({
                     </span>
                   </div>
                   <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white/10">
-                    <div
+                    <motion.div
                       className="h-full rounded-full bg-white/70"
-                      style={{ width: `${stat.accuracy ?? Math.round((stat.answered / stat.total) * 100)}%` }}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${stat.accuracy ?? Math.round((stat.answered / stat.total) * 100)}%` }}
+                      transition={springSnap}
                     />
                   </div>
                 </div>
@@ -160,7 +164,7 @@ export default function ResultInspector({
             type="button"
             onClick={showResults ? onEditAnswers : onReveal}
             disabled={!canReveal && !showResults}
-            className="flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-ink transition-colors hover:bg-white/90 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-white/12 disabled:text-white/35"
+            className="flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-ink transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/90 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-white/12 disabled:text-white/35 disabled:hover:translate-y-0"
           >
             {showResults ? <PencilSimpleLine size={17} weight="bold" /> : <CheckCircle size={17} weight="bold" />}
             {showResults ? '编辑答案' : '生成本地 Report'}
@@ -168,7 +172,7 @@ export default function ResultInspector({
           <button
             type="button"
             onClick={showResults ? onReveal : onReset}
-            className="flex items-center justify-center gap-2 rounded-xl border border-white/12 px-4 py-3 text-sm font-semibold text-white/75 transition-colors hover:bg-white/10 active:scale-[0.98]"
+            className="flex items-center justify-center gap-2 rounded-xl border border-white/12 px-4 py-3 text-sm font-semibold text-white/75 transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/10 active:scale-[0.98]"
           >
             <ArrowCounterClockwise size={17} weight="bold" />
             {showResults ? '重新检查' : '清空重做'}
@@ -178,7 +182,7 @@ export default function ResultInspector({
         {showResults && (
           <Link
             href="/practice/sessions"
-            className="mt-3 flex items-center justify-center gap-2 rounded-xl border border-white/12 px-4 py-3 text-sm font-semibold text-white/75 transition-colors hover:bg-white/10 active:scale-[0.98]"
+            className="mt-3 flex items-center justify-center gap-2 rounded-xl border border-white/12 px-4 py-3 text-sm font-semibold text-white/75 transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/10 active:scale-[0.98]"
           >
             返回 Session Library
             <ArrowRight size={16} weight="bold" />
@@ -188,7 +192,7 @@ export default function ResultInspector({
         <button
           type="button"
           onClick={onClearLocalData}
-          className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-red-200/20 bg-red-200/10 px-4 py-3 text-sm font-semibold text-red-100 transition-colors hover:bg-red-200/15 active:scale-[0.98]"
+          className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-red-200/20 bg-red-200/10 px-4 py-3 text-sm font-semibold text-red-100 transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-200/15 active:scale-[0.98]"
         >
           清空本地 Session 数据
         </button>
@@ -207,14 +211,18 @@ export default function ResultInspector({
           </div>
 
           {queue.length > 0 ? (
-            <div className="space-y-2">
+            <motion.div variants={staggerParent(0.05)} initial="hidden" animate="show" className="space-y-2">
               {queue.map(({ question, label, tone, userAnswer, acceptedAnswer, note }) => {
                 return (
-                  <button
+                  <motion.button
                     key={question.id}
                     type="button"
+                    variants={riseChild}
                     onClick={() => onSelectQuestion(question.id)}
-                    className="w-full rounded-2xl border border-white/10 bg-white/[0.06] p-3 text-left transition-colors hover:bg-white/[0.09] active:scale-[0.99]"
+                    whileHover={{ y: -2 }}
+                    whileTap={{ scale: 0.99 }}
+                    transition={springSnap}
+                    className="w-full rounded-2xl border border-white/10 bg-white/[0.06] p-3 text-left transition-colors hover:bg-white/[0.09]"
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <span className="text-sm font-semibold text-white">Question {question.question_number}</span>
@@ -227,10 +235,10 @@ export default function ResultInspector({
                     </div>
                     {note && <p className="mt-2 rounded-xl bg-white/[0.06] px-3 py-2 text-xs leading-relaxed text-sky-100">{note}</p>}
                     {question.explanation && <p className="mt-2 text-xs leading-relaxed text-white/45">{question.explanation}</p>}
-                  </button>
+                  </motion.button>
                 );
               })}
-            </div>
+            </motion.div>
           ) : (
             <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-4 text-sm text-white/60">
               没有需要优先复盘的题。可以返回 Library，或编辑答案后重新检查。
