@@ -191,7 +191,7 @@ export default function LoginPage() {
 
           <motion.h1
             variants={riseChild}
-            className="text-display text-3xl font-semibold text-ink"
+            className="text-tight text-3xl font-semibold text-ink"
           >
             登录
           </motion.h1>

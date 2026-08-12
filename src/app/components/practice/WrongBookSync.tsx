@@ -108,7 +108,7 @@ export default function WrongBookSync({ queue }: { queue: PracticeReviewQueueIte
         {state.status === 'done' ? (
           <Link
             href="/wrong-book"
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-white px-4 py-2 text-xs font-semibold text-ink transition-all hover:-translate-y-0.5 active:scale-[0.98]"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-white px-4 py-2 text-xs font-semibold text-ink transition-colors hover:bg-white/90 active:scale-[0.98]"
           >
             去错题本
             <ArrowRight size={13} weight="bold" />
@@ -118,7 +118,7 @@ export default function WrongBookSync({ queue }: { queue: PracticeReviewQueueIte
             type="button"
             onClick={handleSave}
             disabled={state.status === 'saving'}
-            className="shrink-0 rounded-full bg-white px-4 py-2 text-xs font-semibold text-ink transition-all hover:-translate-y-0.5 active:scale-[0.98] disabled:opacity-60"
+            className="shrink-0 rounded-full bg-white px-4 py-2 text-xs font-semibold text-ink transition-colors hover:bg-white/90 active:scale-[0.98] disabled:opacity-60"
           >
             {state.status === 'saving' ? '保存中…' : '存入错题本'}
           </button>

@@ -512,7 +512,7 @@ function PracticeSkeleton() {
         </div>
       </div>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-        <div className="hidden rounded-3xl border border-line bg-surface p-6 lg:col-span-6 lg:block">
+        <div className="hidden rounded-2xl border border-line bg-surface p-6 lg:col-span-6 lg:block">
           <div className="mb-5 h-5 w-24 animate-pulse rounded bg-zinc-200" />
           <div className="space-y-3">
             {Array.from({ length: 9 }).map((_, index) => (
@@ -524,12 +524,12 @@ function PracticeSkeleton() {
             ))}
           </div>
         </div>
-        <div className="rounded-3xl border border-line bg-surface lg:col-span-6">
+        <div className="rounded-2xl border border-line bg-surface lg:col-span-6">
           <div className="border-b border-line p-7">
             <div className="h-7 w-4/5 animate-pulse rounded bg-zinc-200" />
             <div className="mt-3 h-7 w-2/3 animate-pulse rounded bg-zinc-200" />
           </div>
-          <div className="space-y-3 bg-zinc-50/70 p-7">
+          <div className="space-y-3 bg-canvas p-7">
             {Array.from({ length: 4 }).map((_, index) => (
               <div key={index} className="h-14 animate-pulse rounded-2xl bg-zinc-200" />
             ))}

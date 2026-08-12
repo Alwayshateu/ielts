@@ -7,7 +7,7 @@ import Link from 'next/link';
 export default function NotFound() {
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-canvas px-6">
-      <div className="w-full max-w-md rounded-[2rem] border border-line bg-surface p-8 text-center shadow-[0_20px_50px_-34px_rgba(24,24,27,0.45)]">
+      <div className="w-full max-w-md rounded-2xl border border-line bg-surface p-8 text-center shadow-sm">
         <p className="text-4xl font-semibold text-tight text-ink">404</p>
         <h1 className="mt-2 text-xl font-semibold text-tight text-ink">没有找到这个页面</h1>
         <p className="mt-3 text-sm leading-relaxed text-ink-muted">

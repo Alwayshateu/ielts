@@ -15,7 +15,7 @@ export default function QuestionDetails({ question }: { question: CollectionItem
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: reduce ? 0 : -8 }}
       transition={springSoft}
-      className="border-t border-line bg-zinc-50/80 px-5 py-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.72)] sm:px-7"
+      className="border-t border-line bg-canvas px-5 py-6 sm:px-7"
     >
       {showOptions && (
         <div className="mb-7 grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -26,8 +26,8 @@ export default function QuestionDetails({ question }: { question: CollectionItem
                 key={option}
                 className={`rounded-xl border px-4 py-3 text-sm leading-relaxed ${
                   correct
-                    ? 'border-emerald-200 bg-emerald-50 text-emerald-800 shadow-[0_12px_28px_-24px_rgba(5,150,105,0.65)]'
-                    : 'border-line bg-surface text-ink-muted shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]'
+                    ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                    : 'border-line bg-surface text-ink-muted'
                 }`}
               >
                 {option}

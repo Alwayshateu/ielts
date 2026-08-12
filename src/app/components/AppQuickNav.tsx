@@ -49,7 +49,7 @@ export default function AppQuickNav() {
 
   return (
     <nav className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8" aria-label="主要学习入口">
-      <div className="flex items-center gap-2 overflow-x-auto rounded-full border border-line bg-surface/85 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.78),0_18px_44px_-36px_rgba(24,24,27,0.35)] backdrop-blur">
+      <div className="flex items-center gap-2 overflow-x-auto rounded-full border border-line bg-surface p-1.5 shadow-sm">
         <span className="hidden items-center gap-2 rounded-full bg-ink px-3 py-2 text-xs font-semibold text-white sm:flex">
           <ListChecks size={14} weight="regular" />
           Study Loop
@@ -67,9 +67,9 @@ export default function AppQuickNav() {
               key={href}
               href={href}
               aria-current={active ? 'page' : undefined}
-              className={`flex shrink-0 items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold transition-all active:scale-[0.98] ${
+              className={`flex shrink-0 items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold transition-colors active:scale-[0.98] ${
                 active
-                  ? 'bg-accent-tint text-accent shadow-[inset_0_1px_0_rgba(255,255,255,0.78)]'
+                  ? 'bg-accent-tint text-accent'
                   : 'text-ink-subtle hover:bg-zinc-50 hover:text-ink'
               }`}
             >

@@ -206,7 +206,7 @@ export default function DashboardContent({
           </div>
         </motion.div>
 
-        <motion.h1 variants={riseChild} className="text-display mt-6 max-w-2xl text-4xl font-semibold text-ink sm:text-5xl">
+        <motion.h1 variants={riseChild} className="text-tight mt-6 max-w-2xl text-3xl font-semibold text-ink sm:text-4xl">
           今天，把一个薄弱点练到更确定。
         </motion.h1>
         <motion.p variants={riseChild} className="mt-3 max-w-xl text-sm leading-relaxed text-ink-subtle">
@@ -226,7 +226,7 @@ export default function DashboardContent({
         {/* Single "do this next" surface — the one decision the page makes for you. */}
         <motion.div
           variants={riseChild}
-          className="mt-8 overflow-hidden rounded-3xl bg-ink text-white shadow-[0_28px_64px_-40px_rgba(24,24,27,0.8)]"
+          className="mt-8 overflow-hidden rounded-2xl bg-ink text-white shadow-sm"
         >
           <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-7">
             <div className="flex items-start gap-4">
@@ -241,7 +241,7 @@ export default function DashboardContent({
             </div>
             <Link
               href={recommendation.href}
-              className="flex w-fit shrink-0 items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-ink transition-all hover:-translate-y-0.5 hover:bg-zinc-100 active:scale-[0.98]"
+              className="flex w-fit shrink-0 items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-ink transition-colors hover:bg-zinc-100 active:scale-[0.98]"
             >
               {recommendation.label}
               <ArrowRight size={16} weight="bold" />
@@ -261,7 +261,7 @@ export default function DashboardContent({
           variants={staggerParent(0.05)}
           initial="hidden"
           animate="show"
-          className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-3xl border border-line bg-line md:grid-cols-4"
+          className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line md:grid-cols-4"
         >
           {metrics.map((metric) => (
             <Metric key={metric.label} {...metric} />
@@ -272,7 +272,7 @@ export default function DashboardContent({
         <motion.div variants={riseChild} initial="hidden" animate="show">
           <Link
             href={PRACTICE_HISTORY_HREF}
-            className="group mt-4 flex items-center justify-between gap-4 rounded-3xl border border-line bg-surface px-5 py-4 transition-all hover:-translate-y-0.5 hover:border-accent/30 active:scale-[0.99]"
+            className="group mt-4 flex items-center justify-between gap-4 rounded-2xl border border-line bg-surface px-5 py-4 transition-colors hover:border-accent/30 active:scale-[0.99]"
           >
             <div className="flex min-w-0 items-center gap-3">
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-accent-tint text-accent">
@@ -352,12 +352,11 @@ export default function DashboardContent({
                 key={cat.id}
                 variants={riseChild}
                 onClick={() => handleStartPractice(cat.id)}
-                whileHover={{ y: -4 }}
                 whileTap={{ scale: 0.98 }}
                 transition={springSnap}
-                className={`group relative flex min-h-40 flex-col justify-between overflow-hidden rounded-3xl p-5 text-left transition-colors ${
+                className={`group relative flex min-h-40 flex-col justify-between overflow-hidden rounded-2xl p-5 text-left transition-colors ${
                   isMixed
-                    ? 'sm:col-span-2 bg-accent text-white shadow-[0_22px_50px_-32px_rgba(79,70,229,0.7)]'
+                    ? 'sm:col-span-2 bg-accent text-white'
                     : 'border border-line bg-surface text-ink hover:border-accent/30'
                 }`}
               >
