@@ -235,7 +235,7 @@ export default function SettingsView({
               type="button"
               onClick={handleSave}
               disabled={saving}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-5 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 active:scale-[0.98] disabled:cursor-wait disabled:opacity-60"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-5 py-3.5 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-zinc-800 active:scale-[0.98] disabled:cursor-wait disabled:opacity-60 disabled:hover:translate-y-0"
             >
               {saving && <CircleNotch size={17} weight="bold" className="animate-spin" />}
               保存设置
@@ -262,7 +262,7 @@ export default function SettingsView({
             <div className="mt-5 flex flex-col gap-2 sm:flex-row">
               <Link
                 href="/practice/sessions"
-                className="flex flex-1 items-center justify-center rounded-xl border border-line bg-surface px-4 py-3 text-sm font-semibold text-ink transition-colors hover:border-accent/30 hover:bg-accent-tint hover:text-accent active:scale-[0.98]"
+                className="flex flex-1 items-center justify-center rounded-xl border border-line bg-surface px-4 py-3 text-sm font-semibold text-ink transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/30 hover:bg-accent-tint hover:text-accent active:scale-[0.98]"
               >
                 打开 Session Library
               </Link>
@@ -270,7 +270,7 @@ export default function SettingsView({
                 type="button"
                 onClick={handleClearSessionData}
                 disabled={clearingSessionData || (localSessionData.sessionsWithData === 0 && localSessionData.annotations === 0)}
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 transition-colors hover:bg-red-100 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-line disabled:bg-zinc-50 disabled:text-ink-subtle"
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700 transition-all duration-200 hover:-translate-y-0.5 hover:bg-red-100 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-line disabled:bg-zinc-50 disabled:text-ink-subtle disabled:hover:translate-y-0"
               >
                 {clearingSessionData ? (
                   <CircleNotch size={17} weight="bold" className="animate-spin" />

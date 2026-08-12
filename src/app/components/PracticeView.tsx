@@ -391,7 +391,7 @@ export default function PracticeView({ userId }: { userId: string }) {
                   type="button"
                   onClick={() => void handleSubmit()}
                   disabled={!userAnswer.trim() || saving}
-                  className="mt-7 flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-5 py-4 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-zinc-300 disabled:text-zinc-500"
+                  className="mt-7 flex w-full items-center justify-center gap-2 rounded-xl bg-ink px-5 py-4 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-zinc-800 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-zinc-300 disabled:text-zinc-500 disabled:hover:translate-y-0"
                 >
                   {saving && <CircleNotch size={17} weight="bold" className="animate-spin" />}
                   提交答案 (Enter)
@@ -476,7 +476,7 @@ export default function PracticeView({ userId }: { userId: string }) {
                     <button
                       type="button"
                       onClick={() => void fetchQuestion()}
-                      className="flex items-center justify-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 active:scale-[0.98]"
+                      className="flex items-center justify-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-zinc-800 active:scale-[0.98]"
                     >
                       下一题 (Space)
                       <ArrowRight size={17} weight="bold" />
@@ -572,7 +572,7 @@ function PracticeNotice({
           <button
             type="button"
             onClick={onAction}
-            className="rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 active:scale-[0.98]"
+            className="rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-zinc-800 active:scale-[0.98]"
           >
             {actionLabel}
           </button>
