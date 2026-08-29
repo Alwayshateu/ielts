@@ -9,6 +9,7 @@ import {
   ClipboardText,
   Gauge,
   Heart,
+  House,
   ListChecks,
   Target,
 } from '@phosphor-icons/react';
@@ -18,6 +19,7 @@ import { getSamplePracticeUnits } from '@/lib/practice-session-samples';
 import { sessionBadgeClass, sessionNavStatusFromSummary } from './nav-status';
 
 const NAV_ITEMS = [
+  { href: '/', label: '首页', Icon: House, match: (path: string) => path === '/' },
   { href: '/dashboard', label: 'Dashboard', Icon: Gauge, match: (path: string) => path === '/dashboard' },
   { href: '/practice', label: '单题练习', Icon: Target, match: (path: string) => path === '/practice' },
   {
