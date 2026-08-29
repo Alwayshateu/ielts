@@ -416,8 +416,8 @@ export default function PracticeView({ userId }: { userId: string }) {
                         aria-checked={selected}
                         disabled={answered}
                         onClick={() => setUserAnswer(option)}
-                        whileHover={answered ? undefined : { x: 3 }}
-                        whileTap={answered ? undefined : { scale: 0.995 }}
+                        whileHover={answered || reduceMotion ? undefined : { x: 3 }}
+                        whileTap={answered || reduceMotion ? undefined : { scale: 0.995 }}
                         transition={springSnap}
                         className={`group/option flex w-full items-start gap-4 border-b border-line px-4 py-4 text-left text-sm transition-colors last:border-b-0 disabled:cursor-default ${
                           selected
