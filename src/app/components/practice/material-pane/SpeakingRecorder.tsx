@@ -150,7 +150,7 @@ export function SpeakingRecorder() {
                   <button
                     type="button"
                     onClick={startRecording}
-                    className="flex items-center gap-2 rounded-2xl bg-rose-700 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-rose-800 active:scale-[0.98]"
+                    className="flex items-center gap-2 rounded-2xl bg-rose-700 px-4 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-rose-800 active:scale-[0.98]"
                   >
                     <Record size={17} weight="fill" />
                     {status === 'recorded' ? '重新录音' : '开始录音'}
@@ -159,7 +159,7 @@ export function SpeakingRecorder() {
                   <button
                     type="button"
                     onClick={stopRecording}
-                    className="flex items-center gap-2 rounded-2xl bg-rose-900 px-4 py-2.5 text-sm font-semibold text-white transition-all hover:bg-black active:scale-[0.98]"
+                    className="flex items-center gap-2 rounded-2xl bg-rose-900 px-4 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-black active:scale-[0.98]"
                   >
                     <Stop size={17} weight="fill" />
                     停止录音
@@ -169,7 +169,7 @@ export function SpeakingRecorder() {
                   <button
                     type="button"
                     onClick={clearRecording}
-                    className="flex items-center gap-2 rounded-2xl border border-rose-200 bg-white px-4 py-2.5 text-sm font-semibold text-rose-800 transition-all hover:bg-rose-100 active:scale-[0.98]"
+                    className="flex items-center gap-2 rounded-2xl border border-rose-200 bg-white px-4 py-2.5 text-sm font-semibold text-rose-800 transition-all duration-200 hover:-translate-y-0.5 hover:bg-rose-100 active:scale-[0.98]"
                   >
                     <Trash size={16} weight="regular" />
                     清除
@@ -212,9 +212,9 @@ export function SpeakingRecorder() {
                         key={band}
                         type="button"
                         onClick={() => setSelfRating((current) => ({ ...current, [criterion.id]: band }))}
-                        className={`h-7 w-7 rounded-full border text-[11px] font-semibold transition-all active:scale-[0.98] ${
+                        className={`h-7 w-7 rounded-full border text-[11px] font-semibold transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98] ${
                           selfRating[criterion.id] === band
-                            ? 'border-rose-700 bg-rose-700 text-white'
+                            ? 'border-rose-700 bg-rose-700 text-white hover:border-rose-800 hover:bg-rose-800'
                             : 'border-rose-200 bg-rose-50 text-rose-700 hover:border-rose-300'
                         }`}
                       >

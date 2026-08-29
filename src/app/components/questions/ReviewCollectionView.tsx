@@ -286,7 +286,7 @@ export default function ReviewCollectionView({
                             type="button"
                             onClick={() => void removeItem(item.entryId)}
                             disabled={removing}
-                            className="flex items-center gap-2 rounded-full bg-ink px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 active:scale-[0.98] disabled:cursor-wait disabled:opacity-60"
+                            className="flex items-center gap-2 rounded-full bg-ink px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-zinc-800 active:scale-[0.98] disabled:cursor-wait disabled:opacity-60 disabled:hover:translate-y-0"
                           >
                             {removing && <CircleNotch size={15} weight="bold" className="animate-spin" />}
                             确认移出

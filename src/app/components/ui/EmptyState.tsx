@@ -41,7 +41,7 @@ export default function EmptyState({
         <button
           type="button"
           onClick={onAction}
-          className="mt-6 rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 active:scale-[0.98]"
+          className="mt-6 rounded-full bg-ink px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-zinc-800 active:scale-[0.98]"
         >
           {actionLabel}
         </button>

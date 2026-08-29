@@ -131,9 +131,9 @@ export function ListeningAudioPlayer({
             <button
               type="button"
               onClick={() => setExamOnce((value) => !value)}
-              className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition-colors active:scale-[0.98] ${
+              className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98] ${
                 examOnce
-                  ? 'border-sky-600 bg-sky-600 text-white'
+                  ? 'border-sky-600 bg-sky-600 text-white hover:border-sky-700 hover:bg-sky-700'
                   : 'border-sky-200 bg-white text-sky-800 hover:border-sky-300'
               }`}
             >
@@ -148,7 +148,7 @@ export function ListeningAudioPlayer({
                 type="button"
                 onClick={togglePlay}
                 disabled={playbackLocked}
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-sky-700 text-white transition-all hover:bg-sky-800 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-sky-200"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-sky-700 text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-sky-800 active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-sky-200 disabled:hover:translate-y-0"
                 aria-label={isPlaying ? '暂停音频' : '播放音频'}
               >
                 {isPlaying ? <Pause size={20} weight="fill" /> : <Play size={20} weight="fill" />}
@@ -198,7 +198,7 @@ export function ListeningAudioPlayer({
                 <button
                   type="button"
                   onClick={() => setShowTranscript((value) => !value)}
-                  className="rounded-full border border-sky-200 px-2.5 py-1 text-[11px] font-semibold text-sky-700 transition-colors hover:border-sky-300 active:scale-[0.98]"
+                  className="rounded-full border border-sky-200 px-2.5 py-1 text-[11px] font-semibold text-sky-700 transition-all duration-200 hover:-translate-y-0.5 hover:border-sky-300 active:scale-[0.98]"
                 >
                   {showTranscript ? '隐藏' : '显示'}
                 </button>
@@ -214,10 +214,10 @@ export function ListeningAudioPlayer({
                         type="button"
                         onClick={() => seekTo(cue.start)}
                         disabled={examOnce}
-                        className={`flex w-full items-start gap-2 rounded-xl px-2.5 py-2 text-left text-xs leading-relaxed transition-colors disabled:cursor-not-allowed ${
+                        className={`flex w-full items-start gap-2 rounded-xl px-2.5 py-2 text-left text-xs leading-relaxed transition-all duration-200 disabled:cursor-not-allowed disabled:hover:translate-y-0 ${
                           active
                             ? 'bg-sky-600 text-white'
-                            : 'text-sky-900/80 hover:bg-sky-50'
+                            : 'text-sky-900/80 hover:-translate-y-0.5 hover:bg-sky-50'
                         }`}
                       >
                         <span className={`shrink-0 tabular-nums font-semibold ${active ? 'text-white/80' : 'text-sky-500'}`}>
@@ -256,7 +256,7 @@ function PlayerChip({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="flex items-center gap-1.5 rounded-full border border-sky-200 bg-white px-3 py-1.5 text-xs font-semibold text-sky-800 transition-colors hover:border-sky-300 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+      className="flex items-center gap-1.5 rounded-full border border-sky-200 bg-white px-3 py-1.5 text-xs font-semibold text-sky-800 transition-all duration-200 hover:-translate-y-0.5 hover:border-sky-300 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0"
     >
       <Icon size={13} weight="regular" />
       {label}

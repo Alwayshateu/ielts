@@ -67,10 +67,10 @@ export default function AppQuickNav() {
               key={href}
               href={href}
               aria-current={active ? 'page' : undefined}
-              className={`flex shrink-0 items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold transition-colors active:scale-[0.98] ${
+              className={`flex shrink-0 items-center gap-2 rounded-full px-3 py-2 text-xs font-semibold transition-all duration-200 active:scale-[0.98] ${
                 active
                   ? 'bg-accent-tint text-accent'
-                  : 'text-ink-subtle hover:bg-zinc-50 hover:text-ink'
+                  : 'text-ink-subtle hover:-translate-y-0.5 hover:bg-zinc-50 hover:text-ink'
               }`}
             >
               <Icon size={14} weight={active ? 'bold' : 'regular'} />

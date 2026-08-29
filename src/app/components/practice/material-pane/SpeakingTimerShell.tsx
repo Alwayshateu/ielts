@@ -68,8 +68,8 @@ function TimerButton({
       type="button"
       onClick={onClick}
       className={variant === 'solid'
-        ? 'rounded-2xl bg-rose-700 px-3 py-2 text-xs font-semibold text-white transition-all hover:bg-rose-800 active:scale-[0.98]'
-        : 'rounded-2xl border border-rose-200 bg-white px-3 py-2 text-xs font-semibold text-rose-800 transition-all hover:bg-rose-100 active:scale-[0.98]'}
+        ? 'rounded-2xl bg-rose-700 px-3 py-2 text-xs font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-rose-800 active:scale-[0.98]'
+        : 'rounded-2xl border border-rose-200 bg-white px-3 py-2 text-xs font-semibold text-rose-800 transition-all duration-200 hover:-translate-y-0.5 hover:bg-rose-100 active:scale-[0.98]'}
     >
       {label}
     </button>

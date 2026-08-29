@@ -334,7 +334,7 @@ export default function MaterialPane({
                       onClearAnnotations();
                     }
                   }}
-                  className="w-fit rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-ink-subtle transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600 active:scale-[0.98]"
+                  className="w-fit rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-ink-subtle transition-all duration-200 hover:-translate-y-0.5 hover:border-red-200 hover:bg-red-50 hover:text-red-600 active:scale-[0.98]"
                 >
                   清空标注
                 </button>
@@ -352,14 +352,14 @@ export default function MaterialPane({
                         <button
                           type="button"
                           onClick={() => startEditingAnnotation(annotation)}
-                          className="rounded-full border border-line px-2 py-1 font-semibold text-ink-subtle transition-colors hover:border-accent/30 hover:bg-accent-tint hover:text-accent active:scale-[0.98]"
+                          className="rounded-full border border-line px-2 py-1 font-semibold text-ink-subtle transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/30 hover:bg-accent-tint hover:text-accent active:scale-[0.98]"
                         >
                           编辑
                         </button>
                         <button
                           type="button"
                           onClick={() => onRemoveAnnotation(annotation.id)}
-                          className="rounded-full border border-line px-2 py-1 font-semibold text-ink-subtle transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600 active:scale-[0.98]"
+                          className="rounded-full border border-line px-2 py-1 font-semibold text-ink-subtle transition-all duration-200 hover:-translate-y-0.5 hover:border-red-200 hover:bg-red-50 hover:text-red-600 active:scale-[0.98]"
                         >
                           删除
                         </button>
@@ -395,7 +395,7 @@ export default function MaterialPane({
               <button
                 type="button"
                 onClick={saveEditingAnnotation}
-                className="rounded-2xl bg-ink px-3 py-2 text-sm font-semibold text-white transition-all hover:bg-zinc-800 active:scale-[0.98]"
+                className="rounded-2xl bg-ink px-3 py-2 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-zinc-800 active:scale-[0.98]"
               >
                 保存
               </button>
@@ -406,7 +406,7 @@ export default function MaterialPane({
                   setEditingAnnotationId(null);
                   setEditDraft('');
                 }}
-                className="rounded-2xl border border-line bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800 transition-all hover:bg-amber-100 active:scale-[0.98]"
+                className="rounded-2xl border border-line bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800 transition-all duration-200 hover:-translate-y-0.5 hover:bg-amber-100 active:scale-[0.98]"
               >
                 转 Highlight
               </button>
@@ -416,7 +416,7 @@ export default function MaterialPane({
                   setEditingAnnotationId(null);
                   setEditDraft('');
                 }}
-                className="rounded-2xl border border-line px-3 py-2 text-sm font-semibold text-ink-muted transition-all hover:bg-zinc-50 active:scale-[0.98]"
+                className="rounded-2xl border border-line px-3 py-2 text-sm font-semibold text-ink-muted transition-all duration-200 hover:-translate-y-0.5 hover:bg-zinc-50 active:scale-[0.98]"
               >
                 取消
               </button>
@@ -439,14 +439,14 @@ export default function MaterialPane({
               <button
                 type="button"
                 onClick={() => createAnnotation('highlight', null)}
-                className="rounded-xl bg-amber-100 px-3 py-2 text-left text-sm font-semibold text-amber-800 transition-colors hover:bg-amber-200 active:scale-[0.98]"
+                className="rounded-xl bg-amber-100 px-3 py-2 text-left text-sm font-semibold text-amber-800 transition-all duration-200 hover:-translate-y-0.5 hover:bg-amber-200 active:scale-[0.98]"
               >
                 Highlight 这段文字
               </button>
               <button
                 type="button"
                 onClick={() => setMenuMode('note')}
-                className="rounded-xl border border-line bg-zinc-50 px-3 py-2 text-left text-sm font-semibold text-ink-muted transition-colors hover:border-accent/30 hover:bg-accent-tint hover:text-accent active:scale-[0.98]"
+                className="rounded-xl border border-line bg-zinc-50 px-3 py-2 text-left text-sm font-semibold text-ink-muted transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/30 hover:bg-accent-tint hover:text-accent active:scale-[0.98]"
               >
                 添加 Note
               </button>
@@ -468,7 +468,7 @@ export default function MaterialPane({
                 <button
                   type="button"
                   onClick={() => createAnnotation('note', noteDraft.trim() || '需要复盘')}
-                  className="flex-1 rounded-2xl bg-ink px-3 py-2 text-sm font-semibold text-white transition-all hover:bg-zinc-800 active:scale-[0.98]"
+                  className="flex-1 rounded-2xl bg-ink px-3 py-2 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-zinc-800 active:scale-[0.98]"
                 >
                   保存
                 </button>
