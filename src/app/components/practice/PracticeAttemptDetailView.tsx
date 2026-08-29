@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { motion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -391,17 +391,25 @@ function QuestionReview({
         </div>
       </div>
 
-      {answers.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-line bg-canvas p-6 text-center text-sm text-ink-subtle">
-          这个筛选下没有题目。
-        </p>
-      ) : (
-        <div className="space-y-2.5">
-          {answers.map((answer) => (
-            <AnswerRow key={answer.questionId} answer={answer} />
-          ))}
-        </div>
-      )}
+        <AnimatePresence mode="popLayout" initial={false}>
+          {answers.length === 0 ? (
+            <motion.p
+              key="empty-filter"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="rounded-2xl border border-dashed border-line bg-canvas p-6 text-center text-sm text-ink-subtle"
+            >
+              这个筛选下没有题目。
+            </motion.p>
+          ) : (
+            <motion.div layout className="space-y-2.5">
+              {answers.map((answer) => (
+                <AnswerRow key={answer.questionId} answer={answer} />
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
     </motion.section>
   );
 }

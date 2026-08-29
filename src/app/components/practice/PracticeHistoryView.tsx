@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { motion } from 'motion/react';
+import { AnimatePresence, motion } from 'motion/react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -287,9 +287,29 @@ export default function PracticeHistoryView() {
                 </div>
               </div>
 
-              {syncState.status !== 'idle' && syncState.status !== 'syncing' && (
-                <SyncBanner state={syncState} />
-              )}
+              <AnimatePresence initial={false} mode="wait">
+                {syncState.status === 'syncing' ? (
+                  <motion.p
+                    key="syncing"
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                    className="mb-4 rounded-xl border border-sky-100 bg-sky-50 px-4 py-3 text-xs font-semibold text-sky-800"
+                    role="status"
+                  >
+                    正在整理本地记录并同步到云端…
+                  </motion.p>
+                ) : syncState.status !== 'idle' ? (
+                  <motion.div
+                    key={syncState.status}
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }}
+                  >
+                    <SyncBanner state={syncState} />
+                  </motion.div>
+                ) : null}
+              </AnimatePresence>
 
               <div className="space-y-6">
                 {grouped.map((group) => (

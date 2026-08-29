@@ -9,7 +9,9 @@ import {
   BookOpenText,
   CheckCircle,
   CircleNotch,
+  ClipboardText,
   Heart,
+  Target,
   WarningCircle,
   XCircle,
 } from '@phosphor-icons/react';
@@ -17,6 +19,7 @@ import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
 import { formatCategory, formatDifficulty } from '@/lib/question-labels';
 import type { IeltsQuestion } from '@/lib/types';
+import { PRACTICE_SESSIONS_HREF } from '@/lib/practice-session-links';
 import { riseChild, springSnap, springSoft, staggerParent } from './ui/motion-presets';
 
 type AnswerStatus = 'idle' | 'correct' | 'wrong';
@@ -222,34 +225,80 @@ export default function PracticeView({ userId }: { userId: string }) {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium text-ink-muted transition-colors hover:bg-zinc-100 hover:text-ink active:scale-[0.98]"
-        >
-          <ArrowLeft size={17} weight="bold" />
-          退出练习
-        </button>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-full bg-accent-tint px-3 py-1 text-xs font-semibold text-accent">
-            {sessionMode}
-          </span>
-          <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-semibold text-ink-muted">
-            {formatDifficulty(question.difficulty)}
-          </span>
-          <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-semibold text-ink-muted">
-            {answerMode}
-          </span>
-        </div>
-      </div>
+      <motion.header variants={staggerParent(0.05)} initial="hidden" animate="show">
+        <motion.div variants={riseChild} className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="mb-5 flex w-fit items-center gap-2 rounded-full border border-line bg-surface px-4 py-2 text-sm font-medium text-ink-muted transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-300 hover:text-ink active:scale-[0.98]"
+            >
+              <ArrowLeft size={17} weight="bold" />
+              退出练习
+            </button>
+            <span className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1 text-xs font-semibold text-ink-subtle">
+              <Target size={14} weight="regular" />
+              Practice Workstation
+            </span>
+            <h1 className="text-display mt-4 max-w-2xl text-3xl font-semibold text-ink sm:text-4xl">
+              先读任务，再提交答案。
+            </h1>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-subtle">
+              当前先用现有题库模拟训练工作台：材料、题干、作答和复盘分区呈现。每次提交都会留下可追踪的练习记录。
+            </p>
+          </div>
 
-      <header className="mt-6">
-        <h1 className="text-tight text-3xl font-semibold text-ink">单题练习</h1>
-        <p className="mt-2 text-sm leading-relaxed text-ink-subtle">
-          从题库随机抽题快速热身，提交会写入历史 / 错题本 / 收藏。按 Enter 提交，答完按 Space 下一题。
-        </p>
-      </header>
+          <div className="flex flex-wrap items-center gap-2 lg:max-w-sm lg:justify-end">
+            <span className="rounded-full bg-accent-tint px-3 py-1 text-xs font-semibold text-accent">
+              {sessionMode}
+            </span>
+            <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-semibold text-ink-muted">
+              {formatDifficulty(question.difficulty)}
+            </span>
+            <span className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-semibold text-ink-muted">
+              {answerMode}
+            </span>
+            <span className="rounded-full border border-line bg-surface px-3 py-1 text-xs font-medium text-ink-subtle">
+              Enter 提交
+            </span>
+            <span className="rounded-full border border-line bg-surface px-3 py-1 text-xs font-medium text-ink-subtle">
+              Space 下一题
+            </span>
+          </div>
+        </motion.div>
+
+        <motion.div variants={riseChild} className="mt-6 grid gap-3 sm:grid-cols-2">
+          <div className="rounded-2xl border border-line bg-surface p-4">
+            <div className="flex items-start gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent-tint text-accent">
+                <ClipboardText size={17} weight="regular" />
+              </span>
+              <div>
+                <p className="text-xs font-semibold text-accent">快速单题练习</p>
+                <h2 className="mt-1 text-base font-semibold text-ink">保持当前题库节奏</h2>
+                <p className="mt-1 text-xs leading-relaxed text-ink-subtle">
+                  适合 5 分钟热身；提交后会同步到历史、错题本和收藏。
+                </p>
+              </div>
+            </div>
+          </div>
+          <Link
+            href={PRACTICE_SESSIONS_HREF}
+            className="group rounded-2xl border border-emerald-200 bg-emerald-50 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-300 active:scale-[0.99]"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold text-emerald-700">完整 Session 训练</p>
+                <h2 className="mt-1 text-base font-semibold text-emerald-950">进入材料 + 题组 + 复盘</h2>
+                <p className="mt-1 text-xs leading-relaxed text-emerald-800/75">
+                  从单题热身切换到更接近真实 IELTS 的连续训练。
+                </p>
+              </div>
+              <ArrowRight size={17} weight="bold" className="mt-1 shrink-0 text-emerald-700 transition-transform duration-200 group-hover:translate-x-1" />
+            </div>
+          </Link>
+        </motion.div>
+      </motion.header>
 
       <AnimatePresence initial={false}>
         {message && (
@@ -274,6 +323,22 @@ export default function PracticeView({ userId }: { userId: string }) {
       >
         <motion.aside variants={riseChild} className="lg:col-span-5">
           <div className="sticky top-6 overflow-hidden rounded-2xl border border-line bg-surface">
+            <div className="border-b border-line bg-ink px-5 py-5 text-white sm:px-6">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold tracking-wide text-white/55">训练任务</p>
+                  <h2 className="mt-1.5 text-xl font-semibold">{sessionMode}</h2>
+                  <p className="mt-1.5 text-xs leading-relaxed text-white/65">
+                    {hasArticle
+                      ? '先浏览材料，再回到右侧完成作答。先定位依据，再提交答案。'
+                      : '重点放在题干理解、答案表达和提交后的解析复盘。'}
+                  </p>
+                </div>
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white">
+                  <ClipboardText size={20} weight="regular" />
+                </span>
+              </div>
+            </div>
             {hasArticle ? (
               <div className="max-h-[60dvh] overflow-y-auto p-5 sm:p-6">
                 <div className="mb-5 flex items-center gap-2 border-b border-line pb-3 text-sm font-semibold text-ink">
@@ -344,20 +409,24 @@ export default function PracticeView({ userId }: { userId: string }) {
                     const selected = userAnswer === option;
                     const marker = String.fromCharCode(65 + index);
                     return (
-                      <button
+                      <motion.button
                         key={`${option}-${index}`}
                         type="button"
                         role="radio"
                         aria-checked={selected}
                         disabled={answered}
                         onClick={() => setUserAnswer(option)}
-                        className={`group/option flex w-full items-start gap-4 border-b border-line px-4 py-4 text-left text-sm transition-colors last:border-b-0 active:scale-[0.995] disabled:cursor-default ${
+                        whileHover={answered ? undefined : { x: 3 }}
+                        whileTap={answered ? undefined : { scale: 0.995 }}
+                        transition={springSnap}
+                        className={`group/option flex w-full items-start gap-4 border-b border-line px-4 py-4 text-left text-sm transition-colors last:border-b-0 disabled:cursor-default ${
                           selected
                             ? 'bg-accent-tint text-ink'
                             : 'text-ink-muted hover:bg-zinc-50 hover:text-ink'
                         } ${answered && !selected ? 'opacity-50' : ''}`}
                       >
-                        <span
+                        <motion.span
+                          layout
                           className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-xs font-semibold transition-colors ${
                             selected
                               ? 'border-accent bg-accent text-white'
@@ -366,9 +435,9 @@ export default function PracticeView({ userId }: { userId: string }) {
                           aria-hidden="true"
                         >
                           {marker}
-                        </span>
+                        </motion.span>
                         <span className="leading-relaxed">{option}</span>
-                      </button>
+                        </motion.button>
                     );
                   })}
                 </div>

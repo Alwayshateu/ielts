@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import type { PassageAnnotation, PracticeUnit } from '@/lib/types';
 import type { AnnotationSyncStatus } from './usePracticeAnnotationSync';
 import { formatDifficulty } from '@/lib/question-labels';
@@ -40,6 +41,7 @@ export default function MaterialPane({
   const transcriptCues = useMemo(() => parseTranscriptCues(unit.metadata?.transcriptCues), [unit.metadata?.transcriptCues]);
   const materialMeta = getMaterialMeta(unit);
   const MaterialIcon = materialMeta.Icon;
+  const reduceMotion = useReducedMotion();
   const [pendingSelection, setPendingSelection] = useState<PendingSelection | null>(null);
   const [noteDraft, setNoteDraft] = useState('');
   const [menuMode, setMenuMode] = useState<'actions' | 'note'>('actions');
@@ -340,90 +342,114 @@ export default function MaterialPane({
                 </button>
               </div>
               <div className="space-y-2">
-                {annotations.map((annotation) => (
-                  <div key={annotation.id} className="rounded-2xl border border-line bg-surface px-3 py-2 text-xs">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        <p className="font-semibold text-ink">{annotation.kind === 'note' ? 'Note' : 'Highlight'} · P{annotation.paragraphIndex + 1}</p>
-                        <p className="mt-1 line-clamp-2 leading-relaxed text-ink-muted">“{annotation.text}”</p>
-                        {annotation.note && <p className="mt-1 leading-relaxed text-amber-700">{annotation.note}</p>}
+                <AnimatePresence initial={false}>
+                  {annotations.map((annotation) => (
+                    <motion.div
+                      key={annotation.id}
+                      layout
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, height: 0, marginTop: 0, overflow: 'hidden' }}
+                      transition={{ duration: 0.18 }}
+                      className="rounded-2xl border border-line bg-surface px-3 py-2 text-xs"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="font-semibold text-ink">{annotation.kind === 'note' ? 'Note' : 'Highlight'} · P{annotation.paragraphIndex + 1}</p>
+                          <p className="mt-1 line-clamp-2 leading-relaxed text-ink-muted">“{annotation.text}”</p>
+                          {annotation.note && <p className="mt-1 leading-relaxed text-amber-700">{annotation.note}</p>}
+                        </div>
+                        <div className="flex shrink-0 flex-col gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => startEditingAnnotation(annotation)}
+                            className="rounded-full border border-line px-2 py-1 font-semibold text-ink-subtle transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/30 hover:bg-accent-tint hover:text-accent active:scale-[0.98]"
+                          >
+                            编辑
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => onRemoveAnnotation(annotation.id)}
+                            className="rounded-full border border-line px-2 py-1 font-semibold text-ink-subtle transition-all duration-200 hover:-translate-y-0.5 hover:border-red-200 hover:bg-red-50 hover:text-red-600 active:scale-[0.98]"
+                          >
+                            删除
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex shrink-0 flex-col gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => startEditingAnnotation(annotation)}
-                          className="rounded-full border border-line px-2 py-1 font-semibold text-ink-subtle transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/30 hover:bg-accent-tint hover:text-accent active:scale-[0.98]"
-                        >
-                          编辑
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => onRemoveAnnotation(annotation.id)}
-                          className="rounded-full border border-line px-2 py-1 font-semibold text-ink-subtle transition-all duration-200 hover:-translate-y-0.5 hover:border-red-200 hover:bg-red-50 hover:text-red-600 active:scale-[0.98]"
-                        >
-                          删除
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
               </div>
             </div>
           )}
         </div>
       </div>
 
-      {editingAnnotation && (
-        <div className="fixed inset-0 z-20 flex items-end bg-zinc-950/18 px-4 py-6 backdrop-blur-[2px] sm:items-center sm:justify-center" data-annotation-menu>
-          <div className="w-full max-w-md rounded-2xl border border-line bg-surface p-5 shadow-[0_30px_80px_-40px_rgba(24,24,27,0.42)]">
-            <p className="text-sm font-semibold text-ink">编辑 {materialMeta.hintTarget} Note</p>
-            <p className="mt-2 line-clamp-3 rounded-2xl bg-zinc-50 px-3 py-2 text-xs leading-relaxed text-ink-subtle">
-              “{editingAnnotation.text}”
-            </p>
-            <label className="mt-4 block">
-              <span className="mb-2 block text-xs font-semibold text-ink">Note 内容</span>
-              <textarea
-                value={editDraft}
-                onChange={(event) => setEditDraft(event.target.value)}
-                rows={4}
-                autoFocus
-                placeholder="留空保存会转为普通 highlight"
-                className="w-full resize-none rounded-2xl border border-line bg-zinc-50 px-3 py-2 text-sm text-ink outline-none transition-all placeholder:text-ink-subtle focus:border-accent focus:bg-surface focus:ring-4 focus:ring-accent/10"
-              />
-            </label>
-            <div className="mt-4 grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={saveEditingAnnotation}
-                className="rounded-2xl bg-ink px-3 py-2 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-zinc-800 active:scale-[0.98]"
-              >
-                保存
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  onUpdateAnnotation(editingAnnotation.id, { kind: 'highlight', note: null });
-                  setEditingAnnotationId(null);
-                  setEditDraft('');
-                }}
-                className="rounded-2xl border border-line bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800 transition-all duration-200 hover:-translate-y-0.5 hover:bg-amber-100 active:scale-[0.98]"
-              >
-                转 Highlight
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setEditingAnnotationId(null);
-                  setEditDraft('');
-                }}
-                className="rounded-2xl border border-line px-3 py-2 text-sm font-semibold text-ink-muted transition-all duration-200 hover:-translate-y-0.5 hover:bg-zinc-50 active:scale-[0.98]"
-              >
-                取消
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {editingAnnotation && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-20 flex items-end bg-zinc-950/18 px-4 py-6 backdrop-blur-[2px] sm:items-center sm:justify-center"
+            data-annotation-menu
+          >
+            <motion.div
+              initial={{ opacity: 0, y: reduceMotion ? 0 : 18, scale: reduceMotion ? 1 : 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: reduceMotion ? 0 : 10, scale: reduceMotion ? 1 : 0.98 }}
+              transition={{ duration: reduceMotion ? 0 : 0.18 }}
+              className="w-full max-w-md rounded-2xl border border-line bg-surface p-5 shadow-[0_30px_80px_-40px_rgba(24,24,27,0.42)]"
+            >
+              <p className="text-sm font-semibold text-ink">编辑 {materialMeta.hintTarget} Note</p>
+              <p className="mt-2 line-clamp-3 rounded-2xl bg-zinc-50 px-3 py-2 text-xs leading-relaxed text-ink-subtle">
+                “{editingAnnotation.text}”
+              </p>
+              <label className="mt-4 block">
+                <span className="mb-2 block text-xs font-semibold text-ink">Note 内容</span>
+                <textarea
+                  value={editDraft}
+                  onChange={(event) => setEditDraft(event.target.value)}
+                  rows={4}
+                  autoFocus
+                  placeholder="留空保存会转为普通 highlight"
+                  className="w-full resize-none rounded-2xl border border-line bg-zinc-50 px-3 py-2 text-sm text-ink outline-none transition-all placeholder:text-ink-subtle focus:border-accent focus:bg-surface focus:ring-4 focus:ring-accent/10"
+                />
+              </label>
+              <div className="mt-4 grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={saveEditingAnnotation}
+                  className="rounded-2xl bg-ink px-3 py-2 text-sm font-semibold text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-zinc-800 active:scale-[0.98]"
+                >
+                  保存
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    onUpdateAnnotation(editingAnnotation.id, { kind: 'highlight', note: null });
+                    setEditingAnnotationId(null);
+                    setEditDraft('');
+                  }}
+                  className="rounded-2xl border border-line bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-800 transition-all duration-200 hover:-translate-y-0.5 hover:bg-amber-100 active:scale-[0.98]"
+                >
+                  转 Highlight
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingAnnotationId(null);
+                    setEditDraft('');
+                  }}
+                  className="rounded-2xl border border-line px-3 py-2 text-sm font-semibold text-ink-muted transition-all duration-200 hover:-translate-y-0.5 hover:bg-zinc-50 active:scale-[0.98]"
+                >
+                  取消
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {pendingSelection && (
         <div
