@@ -98,22 +98,24 @@ export default function PracticeSessionView({ unit }: { unit: PracticeUnit }) {
   const SessionIcon = sessionMeta.Icon;
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <main className="mx-auto min-h-[100dvh] max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       <motion.div variants={staggerParent(0.06)} initial="hidden" animate="show">
-        <motion.header variants={riseChild} className="mb-7 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+        <motion.header variants={riseChild} className="mb-6 grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
-            <Link
-              href="/practice"
-              className="mb-5 flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium text-ink-muted transition-colors hover:bg-zinc-100 hover:text-ink active:scale-[0.98]"
-            >
-              <ArrowLeft size={17} weight="bold" />
-              返回单题练习
-            </Link>
-            <span className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1 text-xs font-semibold text-ink-subtle">
-              <SessionIcon size={14} weight="regular" />
-              {sessionMeta.label}
-            </span>
-            <h1 className="text-tight mt-4 max-w-3xl text-3xl font-semibold text-ink sm:text-4xl">
+            <div className="mb-4 flex flex-wrap items-center gap-2">
+              <Link
+                href="/practice/sessions"
+                className="inline-flex items-center gap-2 rounded-full border border-line bg-white/80 px-3 py-1.5 text-sm font-medium text-ink-muted transition-all hover:-translate-y-0.5 hover:border-accent/25 hover:text-ink active:scale-[0.98]"
+              >
+                <ArrowLeft size={17} weight="bold" />
+                返回 Session Library
+              </Link>
+              <span className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-ink-subtle">
+                <SessionIcon size={14} weight="regular" />
+                {sessionMeta.label}
+              </span>
+            </div>
+            <h1 className="text-display max-w-3xl text-3xl font-semibold text-ink sm:text-4xl">
               {sessionMeta.title}
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-subtle">
@@ -121,16 +123,14 @@ export default function PracticeSessionView({ unit }: { unit: PracticeUnit }) {
             </p>
           </div>
 
-          <div className="rounded-2xl border border-line bg-surface p-4">
+          <div className="rounded-[1.5rem] border border-white/70 bg-[#2d1b33] p-5 text-white shadow-[0_24px_70px_-48px_rgba(45,27,51,0.95)]">
             <div className="flex items-center gap-3">
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-tint text-accent">
+              <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/10 text-white">
                 <ListChecks size={20} weight="regular" />
               </span>
               <div>
-                <p className="text-sm font-semibold text-ink">当前题组</p>
-                <p className="mt-0.5 text-xs text-ink-subtle">
-                  Question {activeIndex + 1} / {unit.questions.length}
-                </p>
+                <p className="text-xs font-semibold tracking-[0.12em] text-white/55">CURRENT TASK</p>
+                <p className="mt-1 text-sm font-semibold text-white">Question {activeIndex + 1} / {unit.questions.length}</p>
               </div>
             </div>
           </div>

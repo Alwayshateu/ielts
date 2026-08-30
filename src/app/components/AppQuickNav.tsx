@@ -51,7 +51,7 @@ export default function AppQuickNav() {
 
   return (
     <nav className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8" aria-label="主要学习入口">
-      <div className="flex items-center gap-2 overflow-x-auto rounded-full border border-line bg-surface p-1.5 shadow-sm">
+      <div className="flex items-center gap-2 overflow-x-auto rounded-full border border-line bg-white/80 p-1.5 shadow-[0_10px_28px_-24px_rgba(45,27,51,0.35)] backdrop-blur-xl">
         <span className="hidden items-center gap-2 rounded-full bg-ink px-3 py-2 text-xs font-semibold text-white sm:flex">
           <ListChecks size={14} weight="regular" />
           Study Loop

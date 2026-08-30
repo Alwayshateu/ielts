@@ -114,7 +114,7 @@ export default function SessionControlBar({
     <motion.section
       layout
       transition={springSnap}
-      className="sticky top-3 z-10 mb-6 rounded-2xl border border-line bg-surface p-4 shadow-sm"
+      className="sticky top-3 z-10 mb-6 rounded-[1.5rem] border border-line bg-white/90 p-4 shadow-[0_14px_40px_-32px_rgba(45,27,51,0.45)] backdrop-blur-xl"
     >
       {autoSubmitted && showResults && (
         <div className="mb-3 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">

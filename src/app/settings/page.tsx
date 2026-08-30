@@ -1,5 +1,4 @@
 import { redirect } from 'next/navigation';
-import AppQuickNav from '../components/AppQuickNav';
 import SettingsView from '../components/SettingsView';
 import { createSupabaseServerClient } from '@/lib/supabase-server';
 
@@ -27,8 +26,7 @@ export default async function SettingsPage() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-canvas">
-      <AppQuickNav />
+    <div className="variant-settings-shell min-h-[100dvh]">
       <SettingsView
         userId={user.id}
         isAnonymous={user.is_anonymous ?? false}

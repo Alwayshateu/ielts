@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  ArrowLeft,
   CaretDown,
   CircleNotch,
   ClipboardText,
@@ -114,15 +115,25 @@ export default function ReviewCollectionView({
   };
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
+    <main className="mx-auto min-h-[100dvh] max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
       <motion.header variants={staggerParent(0.06)} initial="hidden" animate="show">
-        <motion.div variants={riseChild} className="flex items-start gap-4">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-accent-tint text-accent">
-            <Icon size={23} weight={kind === 'favorites' ? 'fill' : 'regular'} />
-          </span>
+        <motion.div variants={riseChild} className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
           <div>
-            <h1 className="text-tight text-3xl font-semibold text-ink">{copy.title}</h1>
-            <p className="mt-1.5 text-sm text-ink-subtle">{copy.count(sources.total)}</p>
+            <div className="mb-5 flex flex-wrap items-center gap-2">
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center gap-2 rounded-full border border-line bg-white/80 px-3 py-1.5 text-sm font-medium text-ink-muted transition-all hover:-translate-y-0.5 hover:border-accent/25 hover:text-ink active:scale-[0.98]"
+              >
+                <ArrowLeft size={17} weight="bold" />
+                返回 Dashboard
+              </Link>
+              <span className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-ink-subtle">
+                <Icon size={14} weight={kind === 'favorites' ? 'fill' : 'regular'} />
+                {kind === 'favorites' ? 'Saved questions' : 'Review queue'}
+              </span>
+            </div>
+            <h1 className="text-display text-3xl font-semibold text-ink sm:text-4xl">{copy.title}</h1>
+            <p className="mt-2 text-sm text-ink-subtle">{copy.count(sources.total)}</p>
             {sources.practice > 0 && (
               <p className="mt-1 text-xs text-ink-muted">
                 其中 {sources.practice} 道来自 Session 训练
@@ -130,8 +141,13 @@ export default function ReviewCollectionView({
               </p>
             )}
           </div>
+          <div className="rounded-[1.5rem] border border-white/70 bg-[#2d1b33] p-5 text-white shadow-[0_24px_70px_-48px_rgba(45,27,51,0.95)]">
+            <p className="text-xs font-semibold tracking-[0.14em] text-white/55">CURRENT QUEUE</p>
+            <p className="mt-2 text-3xl font-semibold tabular-nums">{sources.total}</p>
+            <p className="mt-1 text-xs text-white/60">道题等待你的下一次判断</p>
+          </div>
         </motion.div>
-        <motion.p variants={riseChild} className="mt-4 border-l-2 border-line pl-4 text-sm leading-relaxed text-ink-subtle">
+        <motion.p variants={riseChild} className="mt-6 max-w-3xl rounded-[1.25rem] border border-line bg-white/65 px-5 py-4 text-sm leading-relaxed text-ink-subtle">
           {copy.strategy}
         </motion.p>
       </motion.header>
@@ -175,7 +191,7 @@ export default function ReviewCollectionView({
           variants={staggerParent(0.05)}
           initial="hidden"
           animate="show"
-          className="mt-8 overflow-hidden rounded-2xl border border-line bg-surface"
+          className="mt-8 overflow-hidden rounded-[1.5rem] border border-line bg-surface shadow-[0_14px_40px_-32px_rgba(45,27,51,0.24)]"
         >
           {items.map((item, index) => {
             const expanded = expandedId === item.entryId;

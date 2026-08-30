@@ -41,10 +41,9 @@ export default async function DashboardPage() {
   const stats = await getDashboardStats(supabase, user.id);
 
   return (
-    <div className="min-h-[100dvh] bg-canvas">
+    <div className="variant-dashboard-shell min-h-[100dvh]">
       <AppQuickNav />
       <DashboardContent profile={safeProfile} isAnonymous={isAnonymous} stats={stats} />
     </div>
   );
 }
-

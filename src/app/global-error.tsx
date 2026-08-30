@@ -27,16 +27,25 @@ export default function GlobalError({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          background: '#f6f6f7',
-          color: '#18181b',
+          background: '#faf7f2',
+          color: '#2d1b33',
           fontFamily:
             '-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif',
           padding: '24px',
         }}
       >
-        <div style={{ maxWidth: 420, textAlign: 'center' }}>
+        <div
+          style={{
+            maxWidth: 420,
+            textAlign: 'center',
+            border: '1px solid #e8dfe8',
+            borderRadius: 24,
+            background: '#ffffff',
+            padding: 32,
+          }}
+        >
           <h1 style={{ fontSize: 20, fontWeight: 600, margin: 0 }}>应用遇到问题</h1>
-          <p style={{ marginTop: 12, fontSize: 14, lineHeight: 1.6, color: '#52525b' }}>
+          <p style={{ marginTop: 12, fontSize: 14, lineHeight: 1.6, color: '#705e78' }}>
             请刷新页面重试。如果反复出现，请稍后再来——你的数据是安全的。
           </p>
           <button
@@ -46,7 +55,7 @@ export default function GlobalError({
               marginTop: 24,
               border: 'none',
               borderRadius: 999,
-              background: '#4f46e5',
+              background: '#6d4c7d',
               color: '#fff',
               padding: '10px 22px',
               fontSize: 14,

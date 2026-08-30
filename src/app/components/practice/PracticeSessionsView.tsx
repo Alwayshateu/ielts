@@ -1,7 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useMemo, useState } from 'react';
 import { motion } from 'motion/react';
 import {
   ArrowLeft,
@@ -115,42 +115,38 @@ export default function PracticeSessionsView({ units }: { units: PracticeUnit[] 
 
   const recommendedUnits = useMemo(() => {
     const candidates = filteredUnits.length ? filteredUnits : units;
-
     return getRecommendedPracticeUnits(candidates, draftStatuses, 3);
   }, [draftStatuses, filteredUnits, units]);
 
   const featuredUnit = recommendedUnits[0] ?? null;
-  const learningSummary = useMemo(
-    () => getPracticeLearningSummary(draftStatuses),
-    [draftStatuses]
-  );
+  const learningSummary = useMemo(() => getPracticeLearningSummary(draftStatuses), [draftStatuses]);
   const featuredTone = featuredUnit ? SKILL_TONES[featuredUnit.skill] : null;
   const FeaturedIcon = featuredTone?.Icon ?? BookOpenText;
   const featuredFlow = featuredUnit ? getSessionFlow(featuredUnit) : [];
   const featuredDraftSummary = featuredUnit ? getDraftSummary(draftStatuses[featuredUnit.id]) : null;
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <main className="mx-auto min-h-[100dvh] max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <motion.div variants={staggerParent(0.06)} initial="hidden" animate="show">
-        <motion.header variants={riseChild} className="mb-8 grid gap-6 lg:grid-cols-[1.08fr_0.92fr] lg:items-end">
+        <motion.header variants={riseChild} className="grid gap-6 lg:grid-cols-[1.08fr_0.92fr] lg:items-end">
           <div>
             <div className="mb-5 flex flex-wrap items-center gap-2">
               <Link
                 href="/dashboard"
-                className="flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium text-ink-muted transition-colors hover:bg-zinc-100 hover:text-ink active:scale-[0.98]"
+                className="inline-flex items-center gap-2 rounded-full border border-line bg-white/80 px-3 py-1.5 text-sm font-medium text-ink-muted transition-all hover:-translate-y-0.5 hover:border-accent/25 hover:text-ink active:scale-[0.98]"
               >
                 <ArrowLeft size={17} weight="bold" />
                 返回 Dashboard
               </Link>
               <Link
                 href={PRACTICE_HISTORY_HREF}
-                className="flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium text-ink-muted transition-colors hover:bg-zinc-100 hover:text-ink active:scale-[0.98]"
+                className="inline-flex items-center gap-2 rounded-full border border-line bg-white/80 px-3 py-1.5 text-sm font-medium text-ink-muted transition-all hover:-translate-y-0.5 hover:border-accent/25 hover:text-ink active:scale-[0.98]"
               >
                 <ChartLineUp size={17} weight="regular" />
                 复盘轨迹
               </Link>
             </div>
-            <h1 className="text-tight mt-1 max-w-3xl text-3xl font-semibold text-ink sm:text-4xl">
+            <h1 className="text-display max-w-3xl text-3xl font-semibold text-ink sm:text-4xl">
               从单题训练，走向整组 IELTS 任务。
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-subtle">
@@ -158,14 +154,14 @@ export default function PracticeSessionsView({ units }: { units: PracticeUnit[] 
             </p>
           </div>
 
-          <div className="rounded-2xl border border-line bg-ink p-5 text-white">
+          <div className="rounded-[1.5rem] border border-white/70 bg-[#2d1b33] p-5 text-white shadow-[0_24px_70px_-48px_rgba(45,27,51,0.95)]">
             <div className="flex items-start gap-3">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-white">
                 <Database size={22} weight="regular" />
               </span>
               <div>
-                <p className="text-sm font-semibold">规划先行，不改库</p>
-                <p className="mt-1 text-xs leading-relaxed text-white/55">
+                <p className="text-sm font-semibold text-white">规划先行，不改库</p>
+                <p className="mt-1 text-xs leading-relaxed text-white/65">
                   本页通过 `practice-units.ts` local adapter 消费 sample data，用来预演 practice_units / practice_questions 上线后的入口体验。
                 </p>
               </div>
@@ -178,8 +174,8 @@ export default function PracticeSessionsView({ units }: { units: PracticeUnit[] 
           </div>
         </motion.header>
 
-        <motion.section variants={riseChild} className="mb-8 grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
-          <div className="rounded-2xl border border-line bg-surface p-5">
+        <motion.section variants={riseChild} className="mt-8 grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="rounded-[1.5rem] border border-line bg-surface p-5 shadow-[0_14px_40px_-32px_rgba(45,27,51,0.24)]">
             <p className="text-sm font-semibold text-ink">学习队列</p>
             <p className="mt-2 text-xs leading-relaxed text-ink-subtle">
               根据本机草稿、已检查状态、标记和笔记生成推荐。当前仍然只读 localStorage，不写 Supabase。
@@ -191,7 +187,7 @@ export default function PracticeSessionsView({ units }: { units: PracticeUnit[] 
             </div>
           </div>
 
-          <div className="rounded-2xl border border-line bg-surface p-5">
+          <div className="rounded-[1.5rem] border border-line bg-surface p-5 shadow-[0_14px_40px_-32px_rgba(45,27,51,0.24)]">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold text-ink">推荐下一步</p>
@@ -201,6 +197,7 @@ export default function PracticeSessionsView({ units }: { units: PracticeUnit[] 
                 Top {recommendedUnits.length}
               </span>
             </div>
+
             {recommendedUnits.length > 0 ? (
               <div className="mt-4 grid gap-2 sm:grid-cols-3">
                 {recommendedUnits.map((unit) => {
@@ -236,10 +233,11 @@ export default function PracticeSessionsView({ units }: { units: PracticeUnit[] 
             )}
           </div>
         </motion.section>
+
         {featuredUnit && (
           <motion.section
             variants={riseChild}
-            className={`mb-8 rounded-2xl border bg-surface p-5 sm:p-6 ${featuredTone?.border ?? 'border-line'}`}
+            className={`mt-8 rounded-[1.5rem] border bg-surface p-5 sm:p-6 shadow-[0_14px_40px_-32px_rgba(45,27,51,0.24)] ${featuredTone?.border ?? 'border-line'}`}
           >
             <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
               <div>
@@ -263,12 +261,15 @@ export default function PracticeSessionsView({ units }: { units: PracticeUnit[] 
                   <UnitMetric icon={Clock} label="建议" value={formatMinutes(featuredUnit.time_limit_seconds)} />
                 </div>
               </div>
-              <div className="rounded-xl border border-line bg-canvas p-4">
+
+              <div className="rounded-[1.25rem] border border-line bg-canvas p-4">
                 <p className="text-xs font-semibold text-ink-subtle">Session Flow</p>
                 <div className="mt-4 space-y-3">
                   {featuredFlow.map((item, index) => (
                     <div key={item} className="flex items-center gap-3 rounded-xl bg-surface px-3 py-2">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-ink text-xs font-semibold text-white">{index + 1}</span>
+                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-ink text-xs font-semibold text-white">
+                        {index + 1}
+                      </span>
                       <span className="text-sm font-medium text-ink-muted">{item}</span>
                     </div>
                   ))}
@@ -285,7 +286,7 @@ export default function PracticeSessionsView({ units }: { units: PracticeUnit[] 
           </motion.section>
         )}
 
-        <motion.section variants={riseChild}>
+        <motion.section variants={riseChild} className="mt-8">
           <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h2 className="text-xl font-semibold text-ink">Session Library</h2>
@@ -301,7 +302,7 @@ export default function PracticeSessionsView({ units }: { units: PracticeUnit[] 
                     key={filter.id}
                     type="button"
                     onClick={() => setSkillFilter(filter.id)}
-                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors active:scale-[0.98] ${
+                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-all active:scale-[0.98] ${
                       active
                         ? 'border-ink bg-ink text-white'
                         : 'border-line bg-surface text-ink-subtle hover:border-zinc-300 hover:text-ink'
@@ -313,6 +314,7 @@ export default function PracticeSessionsView({ units }: { units: PracticeUnit[] 
               })}
             </div>
           </div>
+
           {filteredUnits.length > 0 ? (
             <div className="grid gap-4 md:grid-cols-2">
               {filteredUnits.map((unit) => {
@@ -321,35 +323,37 @@ export default function PracticeSessionsView({ units }: { units: PracticeUnit[] 
                 const draftSummary = getDraftSummary(draftStatuses[unit.id]);
 
                 return (
-                <Link
-                  key={unit.id}
-                  href={`/practice/session/${unit.slug}`}
-                  className={`group rounded-2xl border bg-surface p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-300 active:scale-[0.99] ${tone.border} ${tone.hover}`}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${tone.badge}`}>
-                          <Icon size={14} weight="regular" />
-                          {formatMode(unit.mode)}
-                        </span>
-                        <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${draftSummary.className}`}>
-                          {draftSummary.label}
-                        </span>
+                  <Link
+                    key={unit.id}
+                    href={`/practice/session/${unit.slug}`}
+                    className={`group rounded-[1.5rem] border bg-surface p-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-zinc-300 active:scale-[0.99] ${tone.border} ${tone.hover}`}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${tone.badge}`}>
+                            <Icon size={14} weight="regular" />
+                            {formatMode(unit.mode)}
+                          </span>
+                          <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-semibold ${draftSummary.className}`}>
+                            {draftSummary.label}
+                          </span>
+                        </div>
+                        <h3 className="mt-4 text-xl font-semibold text-ink transition-colors group-hover:text-accent">
+                          {unit.title}
+                        </h3>
+                        <p className="mt-2 text-sm leading-relaxed text-ink-subtle">{unit.description}</p>
+                        <p className="mt-4 text-xs font-medium text-ink-subtle">
+                          {formatSkill(unit.skill)} · {unit.questions.length} questions · {formatMinutes(unit.time_limit_seconds)}
+                        </p>
+                        <p className="mt-2 text-xs font-semibold text-accent">{draftSummary.ctaLabel}</p>
                       </div>
-                      <h3 className="mt-4 text-xl font-semibold text-ink transition-colors group-hover:text-accent">{unit.title}</h3>
-                      <p className="mt-2 text-sm leading-relaxed text-ink-subtle">{unit.description}</p>
-                      <p className="mt-4 text-xs font-medium text-ink-subtle">
-                        {formatSkill(unit.skill)} · {unit.questions.length} questions · {formatMinutes(unit.time_limit_seconds)}
-                      </p>
-                      <p className="mt-2 text-xs font-semibold text-accent">{draftSummary.ctaLabel}</p>
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-zinc-50 text-ink-subtle transition-all group-hover:translate-x-1 group-hover:bg-ink group-hover:text-white">
+                        <ArrowRight size={17} weight="bold" />
+                      </span>
                     </div>
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-zinc-50 text-ink-subtle transition-all group-hover:translate-x-1 group-hover:bg-ink group-hover:text-white">
-                      <ArrowRight size={17} weight="bold" />
-                    </span>
-                  </div>
-                </Link>
-              );
+                  </Link>
+                );
               })}
             </div>
           ) : (
@@ -366,7 +370,7 @@ export default function PracticeSessionsView({ units }: { units: PracticeUnit[] 
 
 function EmptySessionState({ title, description }: { title: string; description: string }) {
   return (
-    <div className="mt-4 rounded-2xl border border-dashed border-line bg-zinc-50 p-6 text-center">
+    <div className="mt-4 rounded-[1.5rem] border border-dashed border-line bg-zinc-50 p-6 text-center">
       <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-surface text-ink-subtle">
         <BookOpenText size={20} weight="regular" />
       </span>

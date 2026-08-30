@@ -200,7 +200,7 @@ export default function MaterialPane({
 
   return (
     <aside className="lg:col-span-5">
-      <div className="sticky top-6 overflow-hidden rounded-2xl border border-line bg-surface">
+      <div className="sticky top-6 overflow-hidden rounded-[1.5rem] border border-line bg-surface shadow-[0_14px_40px_-32px_rgba(45,27,51,0.35)]">
         <div className="border-b border-line bg-ink p-6 text-white">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-3 py-1 text-xs font-semibold text-white/65">
             <MaterialIcon size={14} weight="regular" />

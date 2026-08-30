@@ -22,7 +22,7 @@ export default function Error({
 
   return (
     <div className="flex min-h-[100dvh] items-center justify-center bg-canvas px-6">
-      <div className="w-full max-w-md rounded-2xl border border-line bg-surface p-8 text-center shadow-sm">
+      <div className="w-full max-w-md rounded-[1.5rem] border border-line bg-surface p-8 text-center shadow-[0_24px_60px_-44px_rgba(45,27,51,0.45)]">
         <p className="text-xs font-semibold uppercase tracking-wide text-ink-subtle">出错了</p>
         <h1 className="mt-2 text-xl font-semibold text-tight text-ink">页面暂时无法显示</h1>
         <p className="mt-3 text-sm leading-relaxed text-ink-muted">

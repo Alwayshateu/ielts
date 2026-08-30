@@ -1,39 +1,24 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { createSupabaseBrowserClient } from '@/lib/supabase-browser';
-import MagneticButton from '../components/ui/MagneticButton';
 import { springSnap, staggerParent, riseChild } from '../components/ui/motion-presets';
+import AuraField from '../components/ui/AuraField';
 import {
-  BookOpenText,
-  Headphones,
-  PenNib,
-  Microphone,
-  BookmarkSimple,
-  ChartLineUp,
-  EnvelopeSimple,
-  ShieldCheck,
-  CheckCircle,
-  WarningCircle,
-  CircleNotch,
+  ArrowLeft,
   ArrowRight,
+  CheckCircle,
+  CircleNotch,
+  EnvelopeSimple,
+  Moon,
+  ShieldCheck,
+  WarningCircle,
 } from '@phosphor-icons/react';
 
-const SKILL_ORBIT = [
-  { Icon: BookOpenText, label: '阅读', delay: 0 },
-  { Icon: Headphones, label: '听力', delay: 0.15 },
-  { Icon: PenNib, label: '写作', delay: 0.3 },
-  { Icon: Microphone, label: '口语', delay: 0.45 },
-];
-
-const HIGHLIGHTS = [
-  { Icon: BookOpenText, text: '四项技能分类练习，按难度逐步推进' },
-  { Icon: ChartLineUp, text: '错题自动归档，形成可复盘的题库' },
-  { Icon: BookmarkSimple, text: '收藏重点题目，随时回到薄弱环节' },
-];
-
 export default function LoginPage() {
+  const reduceMotion = useReducedMotion();
   const [email, setEmail] = useState('');
   const [loadingEmail, setLoadingEmail] = useState(false);
   const [loadingAnonymous, setLoadingAnonymous] = useState(false);
@@ -84,214 +69,181 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="grid min-h-[100dvh] grid-cols-1 bg-canvas text-ink lg:grid-cols-[1.1fr_1fr]">
-      {/* Branding panel — hidden on small screens, per anti-center-bias split layout. */}
-      <div className="relative hidden overflow-hidden bg-ink px-14 py-16 lg:flex lg:flex-col lg:justify-between">
-        <div
-          className="aurora -left-28 -top-28 h-[440px] w-[440px] bg-accent/35"
-          aria-hidden
-        />
-        <div
-          className="aurora -bottom-36 right-[-6rem] h-[380px] w-[380px] bg-accent/15"
-          style={{ animationDelay: '-11s' }}
-          aria-hidden
-        />
-        <div className="grain absolute inset-0" aria-hidden />
+    <main className="aura-canvas-bg relative min-h-[100dvh] overflow-x-hidden overflow-y-auto text-[#f8f4f9]">
+      <AuraField />
 
-        <motion.div
-          initial={{ opacity: 0, y: -8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={springSnap}
-          className="relative z-10 flex items-center gap-3"
+      {/* Top bar — brand left, version right, per reference composition. */}
+      <div className="absolute inset-x-0 top-0 z-20 flex items-center justify-between px-6 py-6 sm:px-12">
+        <Link
+          href="/"
+          className="glass-1 glass-blur flex h-10 items-center gap-2 rounded-full border border-white/20 px-4 text-sm font-semibold text-[#f8f4f9] transition-all duration-300 hover:-translate-y-0.5 hover:glass-2 active:scale-[0.98]"
         >
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-sm font-semibold text-white">
-            雅
-          </div>
-          <span className="text-tight text-sm font-medium text-zinc-300">
-            IELTS Trainer
+          <ArrowLeft size={15} weight="bold" />
+          IELTS Trainer
+        </Link>
+        <div className="flex items-center gap-3">
+          <span className="hidden font-mono text-xs text-[rgba(248,244,249,0.6)] sm:block">V03.01</span>
+          <span className="glass-1 glass-blur inline-flex h-10 items-center gap-2 rounded-full border border-white/20 px-4 text-xs font-semibold text-[#f8f4f9]">
+            <Moon size={15} weight="regular" />
+            DARK
           </span>
-        </motion.div>
+        </div>
+      </div>
 
-        <div className="relative z-10 max-w-md">
-          <motion.h2
+      {/* Corner metadata — IELTS semantics in the reference's technical voice. */}
+      <span className="tech-label absolute left-6 top-20 z-10 sm:left-12 lg:top-24" aria-hidden="true">
+        PRACTICE.CORE // ON-LINE
+      </span>
+      <span className="tech-label absolute bottom-6 left-6 z-10 sm:left-12" aria-hidden="true">
+        SESSION.SYNC_ESTABLISHED_
+      </span>
+      <span
+        className="tech-label absolute right-12 top-1/2 z-10 hidden -translate-y-1/2 rotate-90 items-center gap-6 lg:flex origin-[center_right]"
+        aria-hidden="true"
+      >
+        <span>BAND</span>
+        <span>=</span>
+        <span>TARGET</span>
+        <span>-7.0</span>
+      </span>
+
+      <div className="relative z-10 grid min-h-[100dvh] grid-cols-1 lg:grid-cols-2">
+        {/* Left column: quiet brand statement over the aura field. */}
+        <div className="hidden flex-col justify-end px-12 pb-16 lg:flex">
+          <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ ...springSnap, delay: 0.05 }}
-            className="text-display text-4xl font-semibold text-white"
+            transition={{ ...springSnap, delay: 0.1 }}
+            className="max-w-md"
           >
-            把薄弱项练成不再犹豫的答案
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ ...springSnap, delay: 0.12 }}
-            className="mt-4 text-sm leading-relaxed text-zinc-400"
-          >
-            一个只为你自己的雅思训练系统：挑难度、练题、回顾错题，三件事循环起来。
-          </motion.p>
-
-          <ul className="mt-9 space-y-4">
-            {HIGHLIGHTS.map(({ Icon, text }, i) => (
-              <motion.li
-                key={text}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ ...springSnap, delay: 0.18 + i * 0.08 }}
-                className="flex items-center gap-3 text-sm text-zinc-300"
-              >
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] text-accent-tint">
-                  <Icon size={16} weight="regular" />
-                </span>
-                {text}
-              </motion.li>
-            ))}
-          </ul>
+            <p className="font-mono text-[11px] tracking-[0.2em] text-[#b08da3]">IELTS.IDENTITY</p>
+            <h2 className="text-display mt-4 text-4xl font-medium leading-tight text-[#f8f4f9]">
+              把薄弱项，
+              <br />
+              练成确定的答案。
+            </h2>
+            <p className="mt-4 text-sm leading-relaxed text-[rgba(248,244,249,0.6)]">
+              练习、记录、复盘放进同一个闭环。每天只需要进入下一组最该做的题。
+            </p>
+          </motion.div>
         </div>
 
-        <div className="relative z-10 flex items-center gap-6">
-          {SKILL_ORBIT.map(({ Icon, label, delay }) => (
-            <div key={label} className="flex flex-col items-center gap-2">
+        {/* Right column: the glass auth panel. */}
+        <div className="flex items-center justify-center px-4 py-24 sm:px-8 lg:justify-self-end lg:pr-[12%]">
+          <motion.div
+            variants={staggerParent(0.07)}
+            initial="hidden"
+            animate="show"
+            className="glass-1 glass-blur flex h-[634px] w-full max-w-[440px] flex-col gap-8 rounded-[3rem] border border-white/40 p-8 shadow-[0_20px_40px_rgba(0,0,0,0.02)] sm:p-12"
+          >
+            <header className="flex flex-col gap-1">
               <motion.span
-                animate={{ scale: [1, 1.12, 1], opacity: [0.7, 1, 0.7] }}
-                transition={{
-                  duration: 3.2,
-                  repeat: Infinity,
-                  ease: 'easeInOut',
-                  delay,
-                }}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 text-zinc-300"
+                variants={riseChild}
+                className="glass-2 mb-2 self-start rounded-full px-3 py-1 font-mono text-[11px] leading-[14px] tracking-[0.1em] text-[#f8f4f9]"
               >
-                <Icon size={15} weight="regular" />
+                IELTS.IDENTITY
               </motion.span>
-              <span className="text-xs text-zinc-500">{label}</span>
-            </div>
-          ))}
+              <motion.h1 variants={riseChild} className="text-display text-[32px] font-medium leading-[1.1] text-[#f8f4f9]">
+                登录
+              </motion.h1>
+              <motion.p variants={riseChild} className="text-sm font-normal text-[rgba(248,244,249,0.6)]">
+                使用邮箱验证链接，或先以游客身份进入训练室。
+              </motion.p>
+            </header>
+
+            <motion.div variants={riseChild}>
+              <button
+                type="button"
+                onClick={handleAnonymousLogin}
+                disabled={loadingAnonymous || loadingEmail}
+                className="glass-2 flex h-14 w-full items-center justify-center gap-2 rounded-full text-sm font-semibold text-[#f8f4f9] transition-all duration-300 hover:-translate-y-0.5 hover:glass-3 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {loadingAnonymous ? (
+                  <CircleNotch size={18} weight="bold" className="animate-spin" />
+                ) : (
+                  <ShieldCheck size={18} weight="regular" />
+                )}
+                游客测试登录
+              </button>
+            </motion.div>
+
+            <motion.div
+              variants={riseChild}
+              className="flex items-center gap-4 whitespace-nowrap font-mono text-[10px] uppercase tracking-[0.1em] text-[#b08da3]"
+            >
+              <span className="h-px flex-1 rounded-full bg-white/12" />
+              EMAIL_OTP_LINK
+              <span className="h-px flex-1 rounded-full bg-white/12" />
+            </motion.div>
+
+            <motion.form variants={riseChild} onSubmit={handleEmailLogin} className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                <label htmlFor="email" className="pl-4 text-xs font-medium text-[rgba(248,244,249,0.6)]">
+                  邮箱地址
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@example.com"
+                  autoComplete="email"
+                  className="glass-2 h-14 w-full rounded-full px-6 text-[15px] text-[#f8f4f9] outline-none transition-colors placeholder:text-[rgba(248,244,249,0.4)] focus:glass-3"
+                />
+                <p className="pl-4 text-xs text-[rgba(248,244,249,0.45)]">
+                  我们会发送一次性登录链接，无需设置密码。
+                </p>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loadingEmail || loadingAnonymous}
+                className="mt-2 flex h-16 w-full items-center justify-between rounded-full bg-[#f8f4f9] px-6 text-base font-semibold text-[#2d1b33] shadow-[0_10px_30px_rgba(45,27,51,0.15)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_15px_40px_rgba(45,27,51,0.25)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+              >
+                {loadingEmail ? (
+                  <CircleNotch size={19} weight="bold" className="mx-auto animate-spin" />
+                ) : (
+                  <>
+                    <span>发送登录链接</span>
+                    <ArrowRight size={19} weight="bold" />
+                  </>
+                )}
+              </button>
+            </motion.form>
+
+            <AnimatePresence mode="wait">
+              {message && (
+                <motion.div
+                  key={message.text}
+                  initial={{ opacity: 0, y: reduceMotion ? 0 : 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: reduceMotion ? 0 : -8 }}
+                  transition={springSnap}
+                  role="status"
+                  className={`mt-6 flex items-start gap-3 rounded-[1.5rem] border p-4 text-sm ${
+                    message.type === 'success'
+                      ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300'
+                      : 'border-red-400/30 bg-red-400/10 text-red-300'
+                  }`}
+                >
+                  {message.type === 'success' ? (
+                    <CheckCircle size={18} weight="regular" className="mt-0.5 shrink-0" />
+                  ) : (
+                    <WarningCircle size={18} weight="regular" className="mt-0.5 shrink-0" />
+                  )}
+                  <span className="font-medium leading-relaxed">{message.text}</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <motion.p variants={riseChild} className="text-center font-mono text-[10px] tracking-[0.1em] text-[rgba(248,244,249,0.4)]">
+              <EnvelopeSimple size={12} weight="regular" className="mr-1.5 inline align-[-2px]" />
+              SUPABASE_AUTH // SECURE_SESSION
+            </motion.p>
+          </motion.div>
         </div>
       </div>
-
-      {/* Form panel */}
-      <div className="relative flex items-center justify-center px-6 py-16 sm:px-12">
-        <motion.div
-          variants={staggerParent(0.07)}
-          initial="hidden"
-          animate="show"
-          className="relative w-full max-w-md rounded-2xl border border-line bg-surface p-6 sm:p-8"
-        >
-          <motion.div
-            variants={riseChild}
-            className="mb-8 flex items-center gap-3 lg:hidden"
-          >
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-sm font-semibold text-white">
-              雅
-            </div>
-            <span className="text-sm font-medium text-ink-muted">
-              IELTS Trainer
-            </span>
-          </motion.div>
-
-          <motion.h1
-            variants={riseChild}
-            className="text-tight text-3xl font-semibold text-ink"
-          >
-            登录
-          </motion.h1>
-          <motion.p variants={riseChild} className="mt-2 text-sm text-ink-subtle">
-            没有邮箱就先用测试账号进系统看看。
-          </motion.p>
-
-          <motion.div variants={riseChild} className="mt-8">
-            <MagneticButton
-              type="button"
-              onClick={handleAnonymousLogin}
-              disabled={loadingAnonymous || loadingEmail}
-              strength={6}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-ink px-4 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-zinc-800 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {loadingAnonymous ? (
-                <CircleNotch size={18} weight="bold" className="animate-spin" />
-              ) : (
-                <ShieldCheck size={18} weight="regular" />
-              )}
-              <span>游客测试登录</span>
-            </MagneticButton>
-          </motion.div>
-
-          <motion.div
-            variants={riseChild}
-            className="my-6 flex items-center gap-3"
-          >
-            <div className="h-px flex-1 bg-line" />
-            <span className="text-xs text-ink-subtle">或者</span>
-            <div className="h-px flex-1 bg-line" />
-          </motion.div>
-
-          <motion.form
-            variants={riseChild}
-            onSubmit={handleEmailLogin}
-            className="space-y-2"
-          >
-            <div className="flex flex-col gap-2">
-              <label htmlFor="email" className="text-sm font-semibold text-ink">
-                邮箱地址
-              </label>
-              <input
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@example.com"
-                className="w-full rounded-2xl border border-line bg-zinc-50 px-4 py-3 text-sm text-ink outline-none transition-all placeholder:text-ink-subtle focus:border-accent focus:bg-surface focus:ring-4 focus:ring-accent/10"
-              />
-              <p className="text-xs text-ink-subtle">
-                我们会发送一次性登录链接，无需设置密码。
-              </p>
-            </div>
-
-            <MagneticButton
-              type="submit"
-              disabled={loadingEmail || loadingAnonymous}
-              strength={6}
-              className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-accent px-4 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-accent-strong active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {loadingEmail ? (
-                <CircleNotch size={18} weight="bold" className="animate-spin" />
-              ) : (
-                <>
-                  <EnvelopeSimple size={18} weight="regular" />
-                  <span>发送登录链接</span>
-                  <ArrowRight size={16} weight="bold" className="ml-0.5" />
-                </>
-              )}
-            </MagneticButton>
-          </motion.form>
-
-          <AnimatePresence mode="wait">
-            {message && (
-              <motion.div
-                key={message.text}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={springSnap}
-                role="status"
-                className={`mt-6 flex items-start gap-3 rounded-xl border p-4 text-sm ${
-                  message.type === 'success'
-                    ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                    : 'border-red-200 bg-red-50 text-red-700'
-                }`}
-              >
-                {message.type === 'success' ? (
-                  <CheckCircle size={18} weight="regular" className="mt-0.5 shrink-0" />
-                ) : (
-                  <WarningCircle size={18} weight="regular" className="mt-0.5 shrink-0" />
-                )}
-                <span className="leading-relaxed font-medium">{message.text}</span>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
-      </div>
-    </div>
+    </main>
   );
 }

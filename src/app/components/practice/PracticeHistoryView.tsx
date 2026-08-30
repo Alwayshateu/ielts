@@ -119,29 +119,36 @@ export default function PracticeHistoryView() {
   const TrendIcon = trend?.Icon;
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+    <main className="mx-auto min-h-[100dvh] max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
       <motion.div variants={staggerParent(0.06)} initial="hidden" animate="show">
-        <motion.header variants={riseChild} className="mb-7">
-          <Link
-            href={PRACTICE_SESSIONS_HREF}
-            className="mb-5 flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium text-ink-muted transition-colors hover:bg-zinc-100 hover:text-ink active:scale-[0.98]"
-          >
-            <ArrowLeft size={17} weight="bold" />
-            返回 Session Library
-          </Link>
-          <span className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1 text-xs font-semibold text-ink-subtle">
-            <ChartLineUp size={14} weight="regular" />
-            Session History · {syncEnabled ? '本地 + 云端' : '本地'}
-          </span>
-          <h1 className="text-tight mt-4 max-w-3xl text-3xl font-semibold text-ink sm:text-4xl">
-            你的 Session 复盘轨迹
-          </h1>
-          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-ink-subtle">
-            每次在 Session 里进入 Review Mode，都会在本机留下一份成绩快照。这里帮你回看正确率、自评 Band 和练习节奏。
-            {syncEnabled
-              ? '记录先存本机，点“同步到云端”可以备份到你的账号，换设备也能查。'
-              : '当前只读 localStorage，不写数据库。'}
-          </p>
+        <motion.header variants={riseChild} className="mb-7 grid gap-6 lg:grid-cols-[1fr_auto] lg:items-end">
+          <div>
+            <Link
+              href={PRACTICE_SESSIONS_HREF}
+              className="mb-5 inline-flex items-center gap-2 rounded-full border border-line bg-white/80 px-3 py-1.5 text-sm font-medium text-ink-muted transition-all hover:-translate-y-0.5 hover:border-accent/25 hover:text-ink active:scale-[0.98]"
+            >
+              <ArrowLeft size={17} weight="bold" />
+              返回 Session Library
+            </Link>
+            <span className="inline-flex items-center gap-2 rounded-full border border-line bg-surface px-3 py-1 text-xs font-semibold text-ink-subtle">
+              <ChartLineUp size={14} weight="regular" />
+              Session History · {syncEnabled ? '本地 + 云端' : '本地'}
+            </span>
+            <h1 className="text-display mt-4 max-w-3xl text-3xl font-semibold text-ink sm:text-4xl">
+              你的 Session 复盘轨迹
+            </h1>
+            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-ink-subtle">
+              每次在 Session 里进入 Review Mode，都会在本机留下一份成绩快照。这里帮你回看正确率、自评 Band 和练习节奏。
+              {syncEnabled
+                ? '记录先存本机，点“同步到云端”可以备份到你的账号，换设备也能查。'
+                : '当前只读 localStorage，不写数据库。'}
+            </p>
+          </div>
+          <div className="rounded-[1.5rem] border border-white/70 bg-[#2d1b33] p-5 text-white shadow-[0_24px_70px_-48px_rgba(45,27,51,0.95)]">
+            <p className="text-xs font-semibold tracking-[0.14em] text-white/55">STUDY SIGNAL</p>
+            <p className="mt-2 text-3xl font-semibold tabular-nums">{streak}</p>
+            <p className="mt-1 text-xs text-white/60">天连续练习</p>
+          </div>
         </motion.header>
 
         {entries.length === 0 ? (

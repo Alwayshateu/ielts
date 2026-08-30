@@ -3,11 +3,11 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'IELTS Trainer — 个人雅思训练系统',
-  description: '发现薄弱项、针对性练习、持续复盘的个人雅思训练系统',
+  description: '用一个沉浸式、可复盘的训练闭环发现薄弱项并持续提升。',
 };
 
 export const viewport: Viewport = {
-  themeColor: '#f6f6f7',
+  themeColor: '#faf7f2',
   colorScheme: 'light dark',
 };
 

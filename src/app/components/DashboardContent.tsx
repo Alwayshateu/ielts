@@ -5,14 +5,16 @@ import { useRouter } from 'next/navigation';
 import { useMemo, useState, type ComponentType } from 'react';
 import { motion } from 'motion/react';
 import {
+  ArrowLeft,
   ArrowRight,
   BookOpenText,
   ChartLineUp,
-  CircleNotch,
   ClipboardText,
+  Database,
   Fire,
   GearSix,
   Headphones,
+  CircleNotch,
   Lightning,
   Microphone,
   PenNib,
@@ -111,8 +113,6 @@ export default function DashboardContent({
     ? '测试管理员'
     : profile.username || profile.email?.split('@')[0] || '学员';
 
-  // One decision from both signals — legacy stats and local session state — so the page
-  // never shows two "do this next" prompts that disagree.
   const recommendation = useMemo(() => {
     const resolved = resolveDashboardRecommendation({
       sessionsInProgress: sessionLearningSummary.inProgress,
@@ -168,8 +168,6 @@ export default function DashboardContent({
     router.push(`/practice?category=${categoryId}&difficulty=${difficulty}`);
   };
 
-  const RecommendationIcon = recommendation.Icon;
-
   const metrics: { label: string; value: string; hint: string }[] = [
     { label: '练习记录', value: String(stats.totalAttempts), hint: '最多显示最近 500 条' },
     { label: '正确率', value: accuracyLabel, hint: '基于现有历史记录' },
@@ -178,15 +176,17 @@ export default function DashboardContent({
   ];
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-      <motion.header variants={staggerParent(0.06)} initial="hidden" animate="show">
+    <main className="variant-dashboard relative min-h-[calc(100dvh-80px)] w-full px-4 py-8 sm:px-6 lg:px-8">
+      <div className="relative z-10 mx-auto w-full max-w-6xl">
+      <motion.div variants={staggerParent(0.06)} initial="hidden" animate="show">
         <motion.div variants={riseChild} className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2 text-xs font-semibold text-ink-subtle">
-            <span>IELTS Trainer</span>
-            {isAnonymous && (
-              <span className="rounded-full bg-amber-50 px-2.5 py-1 text-amber-700">测试登录</span>
-            )}
-          </div>
+          <Link
+            href="/"
+            className="flex items-center gap-2 rounded-full border border-line bg-white/75 px-3 py-1.5 text-xs font-semibold text-ink-muted transition-colors hover:bg-white hover:text-ink active:scale-[0.98]"
+          >
+            <ArrowLeft size={15} weight="bold" />
+            回到首页
+          </Link>
           <div className="flex items-center gap-1">
             <Link
               href="/settings"
@@ -206,12 +206,58 @@ export default function DashboardContent({
           </div>
         </motion.div>
 
-        <motion.h1 variants={riseChild} className="text-tight mt-6 max-w-2xl text-3xl font-semibold text-ink sm:text-4xl">
-          今天，把一个薄弱点练到更确定。
-        </motion.h1>
-        <motion.p variants={riseChild} className="mt-3 max-w-xl text-sm leading-relaxed text-ink-subtle">
-          你好，{displayName}。看见状态，选择难度，然后进入下一步。
-        </motion.p>
+        <motion.header variants={riseChild} className="mt-6 grid gap-6 lg:grid-cols-[1.06fr_0.94fr] lg:items-end">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-accent/15 bg-accent-tint px-3 py-1.5 text-xs font-semibold text-accent">
+              <span className="h-2 w-2 rounded-full bg-accent" />
+              IELTS Trainer / Dashboard
+            </div>
+            <h1 className="text-display mt-4 max-w-2xl text-3xl font-semibold text-ink sm:text-4xl">
+              今天，把一个薄弱点练到更确定。
+            </h1>
+            <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink-subtle">
+              你好，{displayName}。看见状态，选择难度，然后进入下一步。
+            </p>
+            {isAnonymous && (
+              <p className="mt-3 inline-flex rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
+                当前是测试登录
+              </p>
+            )}
+          </div>
+
+          <div className="dashboard-recommendation rounded-[1.5rem] border border-white/70 bg-[#2d1b33] p-5 text-white shadow-[0_24px_70px_-48px_rgba(45,27,51,0.95)]">
+            <div className="flex items-start gap-3">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-white">
+                <Database size={22} weight="regular" />
+              </span>
+              <div>
+                <p className="text-sm font-semibold text-white">今日建议</p>
+                <p className="mt-1 text-xs leading-relaxed text-white/65">
+                  {recommendation.title}
+                </p>
+              </div>
+            </div>
+            <p className="mt-4 text-sm leading-relaxed text-white/80">{recommendation.desc}</p>
+            <div className="mt-5 flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold text-white/80">
+                {recommendation.label}
+              </span>
+              {sessionStreak > 0 && (
+                <span className="flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-[11px] font-semibold text-amber-800">
+                  <Fire size={13} weight="fill" />
+                  {sessionStreak} 天练习
+                </span>
+              )}
+            </div>
+            <Link
+              href={recommendation.href}
+              className="mt-5 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-sm font-semibold text-ink transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
+            >
+              继续这一步
+              <ArrowRight size={16} weight="bold" />
+            </Link>
+          </div>
+        </motion.header>
 
         {stats.statsError && (
           <motion.p
@@ -223,170 +269,140 @@ export default function DashboardContent({
           </motion.p>
         )}
 
-        {/* Single "do this next" surface — the one decision the page makes for you. */}
-        <motion.div
-          variants={riseChild}
-          className="mt-8 overflow-hidden rounded-2xl bg-ink text-white shadow-sm"
-        >
-          <div className="flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-7">
-            <div className="flex items-start gap-4">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-white">
-                <RecommendationIcon size={22} weight="regular" />
-              </span>
-              <div>
-                <p className="text-xs font-semibold tracking-wide text-white/55">今日建议</p>
-                <h2 className="mt-1.5 text-2xl font-semibold">{recommendation.title}</h2>
-                <p className="mt-2 max-w-lg text-sm leading-relaxed text-white/65">{recommendation.desc}</p>
-              </div>
-            </div>
-            <Link
-              href={recommendation.href}
-              className="flex w-fit shrink-0 items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-ink transition-all duration-200 hover:-translate-y-0.5 hover:bg-zinc-100 active:scale-[0.98]"
-            >
-              {recommendation.label}
-              <ArrowRight size={16} weight="bold" />
-            </Link>
+        <section className="mt-8">
+          <div className="flex items-end justify-between gap-4">
+            <h2 className="text-sm font-semibold text-ink-subtle">你的状态</h2>
+            <span className="text-xs text-ink-subtle">
+              上次练习 · {formatLastPracticed(stats.lastPracticedAt)}
+            </span>
           </div>
-        </motion.div>
-      </motion.header>
-      <section className="mt-10">
-        <div className="flex items-end justify-between gap-4">
-          <h2 className="text-sm font-semibold text-ink-subtle">你的状态</h2>
-          <span className="text-xs text-ink-subtle">
-            上次练习 · {formatLastPracticed(stats.lastPracticedAt)}
-          </span>
-        </div>
 
-        <motion.div
-          variants={staggerParent(0.05)}
-          initial="hidden"
-          animate="show"
-          className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line md:grid-cols-4"
-        >
-          {metrics.map((metric) => (
-            <Metric key={metric.label} {...metric} />
-          ))}
-        </motion.div>
-
-        {/* One session-progress strip. Detail links live in the top nav, so this only surfaces the trend. */}
-        <motion.div variants={riseChild} initial="hidden" animate="show">
-          <Link
-            href={PRACTICE_HISTORY_HREF}
-            className="group mt-4 flex items-center justify-between gap-4 rounded-2xl border border-line bg-surface px-5 py-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/30 active:scale-[0.99]"
+          <motion.div
+            variants={staggerParent(0.05)}
+            initial="hidden"
+            animate="show"
+            className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-[1.5rem] border border-line bg-line md:grid-cols-4"
           >
-            <div className="flex min-w-0 items-center gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-accent-tint text-accent">
-                <ChartLineUp size={19} weight="regular" />
-              </span>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-ink">
-                  {sessionHistorySummary && sessionHistorySummary.totalAttempts > 0
-                    ? `已复盘 ${sessionHistorySummary.totalAttempts} 次${
-                        sessionHistorySummary.latestAccuracy !== null
-                          ? ` · 最近 ${sessionHistorySummary.latestAccuracy}%`
-                          : ''
-                      }`
-                    : '查看复盘轨迹'}
-                </p>
-                <p className="mt-0.5 truncate text-xs text-ink-subtle">
-                  草稿 {sessionLearningSummary.inProgress} · 待复盘 {sessionLearningSummary.needsReview} · 已检查 {sessionLearningSummary.checked}
-                </p>
-              </div>
-            </div>
-            <div className="flex shrink-0 items-center gap-3">
-              {sessionStreak > 0 && (
-                <span className="flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-700">
-                  <Fire size={13} weight="fill" />
-                  {sessionStreak} 天
+            {metrics.map((metric) => (
+              <Metric key={metric.label} {...metric} />
+            ))}
+          </motion.div>
+
+          <motion.div variants={riseChild} initial="hidden" animate="show">
+            <Link
+              href={PRACTICE_HISTORY_HREF}
+              className="group mt-4 flex items-center justify-between gap-4 rounded-[1.5rem] border border-line bg-white/85 px-5 py-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/30 active:scale-[0.99]"
+            >
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-accent-tint text-accent">
+                  <ChartLineUp size={19} weight="regular" />
                 </span>
-              )}
-              <ArrowRight size={16} weight="bold" className="text-ink-subtle transition-transform group-hover:translate-x-0.5" />
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-ink">
+                    {sessionHistorySummary && sessionHistorySummary.totalAttempts > 0
+                      ? `已复盘 ${sessionHistorySummary.totalAttempts} 次${
+                          sessionHistorySummary.latestAccuracy !== null
+                            ? ` · 最近 ${sessionHistorySummary.latestAccuracy}%`
+                            : ''
+                        }`
+                      : '查看复盘轨迹'}
+                  </p>
+                  <p className="mt-0.5 truncate text-xs text-ink-subtle">
+                    草稿 {sessionLearningSummary.inProgress} · 待复盘 {sessionLearningSummary.needsReview} · 已检查 {sessionLearningSummary.checked}
+                  </p>
+                </div>
+              </div>
+              <div className="flex shrink-0 items-center gap-3">
+                <ArrowRight size={16} weight="bold" className="text-ink-subtle transition-transform group-hover:translate-x-0.5" />
+              </div>
+            </Link>
+          </motion.div>
+        </section>
+
+        <section className="mt-12">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-ink">开始练习</h2>
+              <p className="mt-1 text-sm text-ink-subtle">先选强度，再选一个方向，系统会按当前难度抽题。</p>
             </div>
-          </Link>
-        </motion.div>
-      </section>
-      <section className="mt-12">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h2 className="text-xl font-semibold text-ink">开始练习</h2>
-            <p className="mt-1 text-sm text-ink-subtle">先选强度，再选一个方向，系统会按当前难度抽题。</p>
+            <div className="inline-flex items-center gap-1 self-start rounded-full border border-line bg-surface p-1 sm:self-auto">
+              {DIFFICULTIES.map((d) => {
+                const active = d.id === difficulty;
+                return (
+                  <button
+                    key={d.id}
+                    type="button"
+                    aria-pressed={active}
+                    onClick={() => setDifficulty(d.id)}
+                    className="relative rounded-full px-4 py-2 text-sm font-medium active:scale-[0.98]"
+                  >
+                    {active && (
+                      <motion.span
+                        layoutId="difficulty-pill"
+                        transition={springSnap}
+                        className="absolute inset-0 rounded-full bg-ink"
+                      />
+                    )}
+                    <span className={`relative ${active ? 'text-white' : 'text-ink-subtle'}`}>{d.label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-          <div className="inline-flex items-center gap-1 self-start rounded-full border border-line bg-surface p-1 sm:self-auto">
-            {DIFFICULTIES.map((d) => {
-              const active = d.id === difficulty;
+
+          <p className="mt-3 text-sm text-ink-subtle">{activeHint}</p>
+
+          <motion.div
+            variants={staggerParent(0.05)}
+            initial="hidden"
+            animate="show"
+            className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
+          >
+            {categories.map((cat) => {
+              const isMixed = cat.id === 'mixed';
+              const Icon = cat.icon;
               return (
-                <button
-                  key={d.id}
-                  type="button"
-                  aria-pressed={active}
-                  onClick={() => setDifficulty(d.id)}
-                  className="relative rounded-full px-4 py-2 text-sm font-medium active:scale-[0.98]"
+                <motion.button
+                  key={cat.id}
+                  variants={riseChild}
+                  onClick={() => handleStartPractice(cat.id)}
+                  whileHover={{ y: -4, scale: 1.01 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={springSnap}
+                  className={`portal-action-card group relative flex min-h-40 flex-col justify-between overflow-hidden rounded-[1.5rem] p-5 text-left transition-colors ${
+                    isMixed
+                      ? 'sm:col-span-2 bg-accent text-white'
+                      : 'border border-line bg-surface text-ink hover:border-accent/30'
+                  }`}
                 >
-                  {active && (
-                    <motion.span
-                      layoutId="difficulty-pill"
-                      transition={springSnap}
-                      className="absolute inset-0 rounded-full bg-ink"
+                  <div className="flex items-start justify-between gap-4">
+                    <span
+                      className={`flex h-11 w-11 items-center justify-center rounded-2xl transition-colors ${
+                        isMixed ? 'bg-white/15 text-white' : 'bg-accent-tint text-accent'
+                      }`}
+                    >
+                      <Icon size={21} weight="regular" />
+                    </span>
+                    <ArrowRight
+                      size={17}
+                      weight="bold"
+                      className={`transition-transform duration-300 group-hover:translate-x-1 ${
+                        isMixed ? 'text-white/70' : 'text-ink-subtle'
+                      }`}
                     />
-                  )}
-                  <span className={`relative ${active ? 'text-white' : 'text-ink-subtle'}`}>{d.label}</span>
-                </button>
+                  </div>
+                  <div className="mt-6">
+                    <h3 className="text-lg font-semibold">{cat.name}</h3>
+                    <p className={`mt-1 text-sm ${isMixed ? 'text-white/70' : 'text-ink-subtle'}`}>{cat.desc}</p>
+                    <p className={`mt-2 text-xs leading-relaxed ${isMixed ? 'text-white/55' : 'text-ink-subtle'}`}>{cat.detail}</p>
+                  </div>
+                </motion.button>
               );
             })}
-          </div>
-        </div>
-
-        <p className="mt-3 text-sm text-ink-subtle">{activeHint}</p>
-
-        <motion.div
-          variants={staggerParent(0.05)}
-          initial="hidden"
-          animate="show"
-          className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
-        >
-          {categories.map((cat) => {
-            const isMixed = cat.id === 'mixed';
-            const Icon = cat.icon;
-            return (
-              <motion.button
-                key={cat.id}
-                variants={riseChild}
-                onClick={() => handleStartPractice(cat.id)}
-                whileHover={{ y: -4, scale: 1.01 }}
-                whileTap={{ scale: 0.98 }}
-                transition={springSnap}
-                className={`group relative flex min-h-40 flex-col justify-between overflow-hidden rounded-2xl p-5 text-left transition-colors ${
-                  isMixed
-                    ? 'sm:col-span-2 bg-accent text-white'
-                    : 'border border-line bg-surface text-ink hover:border-accent/30'
-                }`}
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <span
-                    className={`flex h-11 w-11 items-center justify-center rounded-2xl transition-colors ${
-                      isMixed ? 'bg-white/15 text-white' : 'bg-accent-tint text-accent'
-                    }`}
-                  >
-                    <Icon size={21} weight="regular" />
-                  </span>
-                  <ArrowRight
-                    size={17}
-                    weight="bold"
-                    className={`transition-transform duration-300 group-hover:translate-x-1 ${
-                      isMixed ? 'text-white/70' : 'text-ink-subtle'
-                    }`}
-                  />
-                </div>
-                <div className="mt-6">
-                  <h3 className="text-lg font-semibold">{cat.name}</h3>
-                  <p className={`mt-1 text-sm ${isMixed ? 'text-white/70' : 'text-ink-subtle'}`}>{cat.desc}</p>
-                  <p className={`mt-2 text-xs leading-relaxed ${isMixed ? 'text-white/55' : 'text-ink-subtle'}`}>{cat.detail}</p>
-                </div>
-              </motion.button>
-            );
-          })}
-        </motion.div>
-      </section>
+          </motion.div>
+        </section>
+      </motion.div>
+      </div>
     </main>
   );
 }
@@ -400,4 +416,3 @@ function Metric({ label, value, hint }: { label: string; value: string; hint: st
     </motion.div>
   );
 }
-
