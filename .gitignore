@@ -41,3 +41,13 @@ yarn-error.log*
 next-env.d.ts
 
 .vercel
+
+# local dev server logs
+.next-dev.log
+.next-dev.err.log
+
+# internal progress reports — served publicly from /public, keep out of the build
+public/reports/
+
+# raw Cambridge IELTS source PDFs (copyrighted — do not commit) and their extracted intermediates
+/raw/

@@ -1,59 +1,49 @@
-import { createServerClient } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { createSupabaseServerClient } from '@/lib/supabase-server';
+import { getDashboardStats } from '@/lib/dashboard-stats';
+import { redirect } from 'next/navigation';
+import AppQuickNav from '../components/AppQuickNav';
 import DashboardContent from '../components/DashboardContent';
 
 // 防止数据缓存
 export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
-  const cookieStore = await cookies();
-  
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)
-          );
-        },
-      },
-    }
-  );
+  const supabase = await createSupabaseServerClient();
 
   // 2. 获取用户
   const { data: { user }, error: authError } = await supabase.auth.getUser();
 
   if (authError || !user) {
-    return (
-      <div className="h-screen flex items-center justify-center text-red-500">
-        认证失效，请刷新页面。
-      </div>
-    );
+    redirect('/login');
   }
 
-  // 3. 获取用户 profile
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('username, email')
-    .eq('id', user.id)
-    .single();
+  const isAnonymous = user.is_anonymous ?? false;
 
-  if (profileError) {
-    console.error('Profile fetch error:', profileError);
+  // 3. 获取用户 profile
+  let profile = null;
+  if (!isAnonymous) {
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('username, email')
+      .eq('id', user.id)
+      .single();
+
+    if (profileError) {
+      console.error('Profile fetch error:', profileError);
+    }
+
+    profile = profileData;
   }
 
   // 4. 防止 profile 为 null 导致组件报错
-  const safeProfile = profile || { email: user.email, username: null };
+  const safeProfile = profile || { email: user.email ?? null, username: null };
+
+  const stats = await getDashboardStats(supabase, user.id);
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa]">
-      <DashboardContent profile={safeProfile} />
+    <div className="variant-dashboard-shell min-h-[100dvh]">
+      <AppQuickNav />
+      <DashboardContent profile={safeProfile} isAnonymous={isAnonymous} stats={stats} />
     </div>
   );
 }
-
